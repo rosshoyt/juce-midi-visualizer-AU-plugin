@@ -158,7 +158,7 @@ struct OpenGLDemoClasses
     {
         Shape (OpenGLContext& openGLContext)
         {
-            if (shapeFile.load (BinaryData::teapot_obj).wasOk())
+            if (shapeFile.load (BinaryData::pianokey_rectangle_obj).wasOk())
                 for (int i = 0; i < shapeFile.shapes.size(); ++i)
                     vertexBuffers.add (new VertexBuffer (openGLContext, *shapeFile.shapes.getUnchecked(i)));
             
@@ -318,20 +318,22 @@ private:
         glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         
         shader->use();
-        
-        if (uniforms->projectionMatrix != nullptr)
-            uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
-        
-        if (uniforms->viewMatrix != nullptr)
-            uniforms->viewMatrix->setMatrix4 (getViewMatrix().mat, 1, false);
-        
-        if (uniforms->texture != nullptr)
-            uniforms->texture->set ((GLint) 0);
-        
-        if (uniforms->lightPosition != nullptr)
-            uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
-        
-        shape->draw (openGLContext, *attributes);
+        for(int i = 0; i < 128; i++){
+            
+            if (uniforms->projectionMatrix != nullptr)
+                uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
+            
+            if (uniforms->viewMatrix != nullptr)
+                uniforms->viewMatrix->setMatrix4 (getViewMatrix(i).mat, 1, false);
+            
+            if (uniforms->texture != nullptr)
+                uniforms->texture->set ((GLint) 0);
+            
+            if (uniforms->lightPosition != nullptr)
+                uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
+            
+            shape->draw (openGLContext, *attributes);
+        }
         
         // Reset the element buffers so child Components draw correctly
         openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, 0);
@@ -382,21 +384,54 @@ private:
     
     Matrix3D<float> getProjectionMatrix() const
     {
-        float w = 1.0f / (scale + 0.1f);
-        float h = w * getLocalBounds().toFloat().getAspectRatio (false);
+        //auto w = 1.0f / (scale + 0.1f);
+        auto w = 1.0f / (scale + 0.1f);
+        auto h = w * getLocalBounds().toFloat().getAspectRatio (false);
+        
         return Matrix3D<float>::fromFrustum (-w, w, -h, h, 4.0f, 30.0f);
+        //return Matrix3D<float>::fromFrustum (-1000.0f,-750.0f, -h, h, 4.0f, 30.0f);
     }
-    
-    Matrix3D<float> getViewMatrix() const
+    Matrix3D<float> getViewMatrix(int i) const
     {
-        Matrix3D<float> viewMatrix = draggableOrientation.getRotationMatrix()
+        int fundamentalPitch = i % 12;
+        auto viewMatrix = draggableOrientation.getRotationMatrix()
         * Vector3D<float> (0.0f, 1.0f, -10.0f);
         
-        //Matrix3D<float> rotationMatrix = viewMatrix.rotated (Vector3D<float> (rotation, rotation, -0.3f));
+        float angle = 360.0f / 12.0f;
+        float rotY = angle * fundamentalPitch * DegreesToRadians;
+        auto rotationMatrix = Matrix3D<float>::rotation ({ 1.55f, rotY, -1.55f });
         
-        return //rotationMatrix *
-            viewMatrix;
+        
+        float cylinderRadius = 1.0f;
+        //x2 = x1 + cylinderRadius * cos(degreesToRadians(fundamentalPitch * angle));
+        //y2 = y1 + cylinderRadius * sin(degreesToRadians(fundamentalPitch * angle));
+        
+        float translateX = 0;//cylinderRadius * sin(degreesToRadians(fundamentalPitch * angle));
+        float translateY = i * -.5f + 20.0f;
+        float translateZ = 0;//cylinderRadius * cos(degreesToRadians(fundamentalPitch * angle));
+        
+        auto translationMatrix = Matrix3D<float> ({ translateX, translateY, translateZ });
+        return  rotationMatrix * translationMatrix * viewMatrix;
+        
     }
+    const float DegreesToRadians = 3.14159265358f/180.f;
+//    Matrix3D<float> getProjectionMatrix() const
+//    {
+//        float w = 1.0f / (scale + 0.1f);
+//        float h = w * getLocalBounds().toFloat().getAspectRatio (false);
+//        return Matrix3D<float>::fromFrustum (-w, w, -h, h, 4.0f, 30.0f);
+//    }
+//
+//    Matrix3D<float> getViewMatrix() const
+//    {
+//        Matrix3D<float> viewMatrix = draggableOrientation.getRotationMatrix()
+//        * Vector3D<float> (0.0f, 1.0f, -10.0f);
+//
+//        //Matrix3D<float> rotationMatrix = viewMatrix.rotated (Vector3D<float> (rotation, rotation, -0.3f));
+//
+//        return //rotationMatrix *
+//            viewMatrix;
+//    }
     
     void resized() override
     {
@@ -501,6 +536,8 @@ private:
         
         return Array<ShaderPreset> (presets, numElementsInArray (presets));
     }
+    
+    
 };
 
 
@@ -510,11 +547,11 @@ GlpluginAudioProcessorEditor::GlpluginAudioProcessorEditor (GlpluginAudioProcess
 {
     glComponent = new GLComponent;
     
-    addAndMakeVisible (btn);
+    //addAndMakeVisible (btn);
     addAndMakeVisible (glComponent);
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    setSize (1000, 750);
 }
 
 GlpluginAudioProcessorEditor::~GlpluginAudioProcessorEditor()
@@ -530,6 +567,6 @@ void GlpluginAudioProcessorEditor::resized()
 {
     Rectangle<int> r = getLocalBounds();
     
-    btn.setBounds (r.removeFromTop (r.getHeight() >> 1));
+    //btn.setBounds (r.removeFromTop (r.getHeight() >> 1));
     glComponent->setBounds (r);
 }

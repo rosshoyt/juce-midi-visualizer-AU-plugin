@@ -16,6 +16,9 @@
       <FILE id="fSqP7u" name="teapot.obj" compile="0" resource="1" file="Source/teapot.obj"/>
       <FILE id="jgHuHz" name="WavefrontObjParser.h" compile="0" resource="0"
             file="Source/WavefrontObjParser.h"/>
+      <FILE id="DjM1z3" name="cylinder.obj" compile="0" resource="1" file="../../Development/GRAPHICS OBJS/cylinder.obj"/>
+      <FILE id="zpF7xa" name="pianokey_rectangle.obj" compile="0" resource="1"
+            file="../../Development/GRAPHICS OBJS/pianokey_rectangle.obj"/>
       <FILE id="mvEDBJ" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="GZQ16D" name="PluginProcessor.h" compile="0" resource="0"
