@@ -35,8 +35,15 @@ private:
     // access the processor object that created it.
     GlpluginAudioProcessor& processor;
 
-    TextButton btn;
+
+    MidiKeyboardComponent midiKeyboardComponent;
+    MidiKeyboardState midiKeyboardState;
+    
     ScopedPointer<GLComponent> glComponent;
+    
+    // Display Constants
+    static const int MARGIN = 4, MAX_WINDOW_HEIGHT = 800, MAX_WINDOW_WIDTH = 1200 + 2 * MARGIN,
+    MAX_KEYB_WIDTH = 1200, MAX_KEYB_HEIGHT = 82, TEXT_BUTTON_WIDTH = 50, TEXT_BUTTON_HEIGHT = 30;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlpluginAudioProcessorEditor)
 };
 

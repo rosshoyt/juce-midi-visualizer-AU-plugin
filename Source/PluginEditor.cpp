@@ -536,22 +536,33 @@ private:
         
         return Array<ShaderPreset> (presets, numElementsInArray (presets));
     }
+    void mouseDown (const MouseEvent& e) override
+    {
+        draggableOrientation.mouseDown (e.getPosition());
+    }
     
+    void mouseDrag (const MouseEvent& e) override
+    {
+        draggableOrientation.mouseDrag (e.getPosition());
+    }
     
 };
 
 
 //==============================================================================
 GlpluginAudioProcessorEditor::GlpluginAudioProcessorEditor (GlpluginAudioProcessor& p)
-: AudioProcessorEditor (&p), processor (p), btn ("Hello World!")
+: AudioProcessorEditor (&p), processor (p), midiKeyboardComponent(midiKeyboardState, MidiKeyboardComponent::horizontalKeyboard)
 {
     glComponent = new GLComponent;
     
     //addAndMakeVisible (btn);
     addAndMakeVisible (glComponent);
+    
+    addAndMakeVisible(midiKeyboardComponent);
+    
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (1000, 750);
+    setSize (1000, 800);
 }
 
 GlpluginAudioProcessorEditor::~GlpluginAudioProcessorEditor()
@@ -566,7 +577,12 @@ void GlpluginAudioProcessorEditor::paint (Graphics& g)
 void GlpluginAudioProcessorEditor::resized()
 {
     Rectangle<int> r = getLocalBounds();
-    
+    float resizedKeybWidth = r.getWidth() - MARGIN * 2, resizedKeybHeight = r.getHeight() - 5;
+    float keybWidth = resizedKeybWidth > MAX_KEYB_WIDTH ? MAX_KEYB_WIDTH : resizedKeybWidth;
+    float keybHeight = resizedKeybHeight > MAX_KEYB_HEIGHT ? MAX_KEYB_HEIGHT : resizedKeybHeight;
+    midiKeyboardComponent.setBounds (MARGIN, MARGIN, keybWidth, keybHeight );
+    //midiKeyboardComponent.setBounds(r.removeFromTop())
     //btn.setBounds (r.removeFromTop (r.getHeight() >> 1));
-    glComponent->setBounds (r);
+    //glComponent->setBounds (0, r.getY() - keybHeight, r.getWidth(), r.getHeight());
+    glComponent->setBounds(r.removeFromBottom(r.getHeight() - keybHeight));
 }
