@@ -18,9 +18,6 @@
             file="Source/WavefrontObjParser.h"/>
       <FILE id="mvEDBJ" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
-      <FILE id="Aeekoa" name="cylinder.obj" compile="0" resource="1" file="../../Development/GRAPHICS OBJS/cylinder.obj"/>
-      <FILE id="Yh9ytk" name="pianokey_rectangle.obj" compile="0" resource="1"
-            file="../../Development/GRAPHICS OBJS/pianokey_rectangle.obj"/>
       <FILE id="GZQ16D" name="PluginProcessor.h" compile="0" resource="0"
             file="Source/PluginProcessor.h"/>
       <FILE id="TwhEBw" name="PluginEditor.cpp" compile="1" resource="0"

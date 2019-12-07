@@ -3300,136 +3300,6 @@ static const unsigned char temp_binary_data_1[] =
 
 const char* teapot_obj = (const char*) temp_binary_data_1;
 
-//================== cylinder.obj ==================
-static const unsigned char temp_binary_data_2[] =
-"# Object Export From Tinkercad Server 2015\n"
-"\n"
-"#mtllib obj.mtl\n"
-"\n"
-"o obj_0\n"
-"v -13 \t\t-7 \t\t0\n"
-"v -12.866 \t\t-6.5 \t\t0\n"
-"v -12.5 \t\t-6.134 \t\t0\n"
-"v -12 \t\t-6 \t\t0\n"
-"v -11.5 \t\t-6.134 \t\t0\n"
-"v -11.134 \t\t-6.5 \t\t128\n"
-"v -11.134 \t\t-6.5 \t\t0\n"
-"v -12 \t\t-6 \t\t128\n"
-"v -11 \t\t-7 \t\t0\n"
-"v -12.5 \t\t-6.134 \t\t128\n"
-"v -11.134 \t\t-7.5 \t\t0\n"
-"v -11.5 \t\t-7.866 \t\t0\n"
-"v -12 \t\t-8 \t\t0\n"
-"v -12.5 \t\t-7.866 \t\t0\n"
-"v -12.866 \t\t-7.5 \t\t0\n"
-"v -11.134 \t\t-7.5 \t\t128\n"
-"v -11 \t\t-7 \t\t128\n"
-"v -12 \t\t-8 \t\t128\n"
-"v -11.5 \t\t-6.134 \t\t128\n"
-"v -12.866 \t\t-7.5 \t\t128\n"
-"v -11.5 \t\t-7.866 \t\t128\n"
-"v -12.5 \t\t-7.866 \t\t128\n"
-"v -13 \t\t-7 \t\t128\n"
-"v -12.866 \t\t-6.5 \t\t128\n"
-"# 24 vertices\n"
-"\n"
-"g group_0_16089887\n"
-"\n"
-"usemtl color_16089887\n"
-"s 0\n"
-"\n"
-"f 1 \t2 \t3\n"
-"f 1 \t3 \t4\n"
-"f 1 \t4 \t5\n"
-"f 1 \t5 \t7\n"
-"f 1 \t7 \t9\n"
-"f 1 \t9 \t11\n"
-"f 1 \t11 \t12\n"
-"f 1 \t12 \t13\n"
-"f 1 \t13 \t14\n"
-"f 1 \t14 \t15\n"
-"f 16 \t11 \t9\n"
-"f 16 \t9 \t17\n"
-"f 20 \t15 \t14\n"
-"f 20 \t14 \t22\n"
-"f 18 \t13 \t12\n"
-"f 18 \t12 \t21\n"
-"f 16 \t21 \t12\n"
-"f 16 \t12 \t11\n"
-"f 6 \t7 \t5\n"
-"f 6 \t5 \t19\n"
-"f 22 \t14 \t13\n"
-"f 22 \t13 \t18\n"
-"f 23 \t1 \t15\n"
-"f 23 \t15 \t20\n"
-"f 17 \t9 \t7\n"
-"f 17 \t7 \t6\n"
-"f 4 \t3 \t10\n"
-"f 4 \t10 \t8\n"
-"f 8 \t10 \t24\n"
-"f 8 \t24 \t23\n"
-"f 8 \t23 \t20\n"
-"f 8 \t20 \t22\n"
-"f 8 \t22 \t18\n"
-"f 8 \t18 \t21\n"
-"f 8 \t21 \t16\n"
-"f 8 \t16 \t17\n"
-"f 8 \t17 \t6\n"
-"f 8 \t6 \t19\n"
-"f 24 \t2 \t1\n"
-"f 24 \t1 \t23\n"
-"f 19 \t5 \t4\n"
-"f 19 \t4 \t8\n"
-"f 10 \t3 \t2\n"
-"f 10 \t2 \t24\n"
-"# 44 faces\n"
-"\n"
-" #end of obj_0\n"
-"\n";
-
-const char* cylinder_obj = (const char*) temp_binary_data_2;
-
-//================== pianokey_rectangle.obj ==================
-static const unsigned char temp_binary_data_3[] =
-"# Object Export From Tinkercad Server 2015\n"
-"\n"
-"#mtllib obj.mtl\n"
-"\n"
-"#o obj_0\n"
-"v 1 \t\t-7.5 \t\t0.75\n"
-"v 1 \t\t-7.5 \t\t0\n"
-"v 1 \t\t1.5 \t\t0\n"
-"v 1 \t\t1.5 \t\t0.75\n"
-"v -0.5 \t\t1.5 \t\t0.75\n"
-"v -0.5 \t\t1.5 \t\t0\n"
-"v -0.5 \t\t-7.5 \t\t0\n"
-"v -0.5 \t\t-7.5 \t\t0.75\n"
-"# 8 vertices\n"
-"\n"
-"g group_0_16089887\n"
-"\n"
-"#usemtl color_16089887\n"
-"#s 0\n"
-"\n"
-"f 1 \t2 \t3\n"
-"f 1 \t3 \t4\n"
-"f 5 \t6 \t7\n"
-"f 5 \t7 \t8\n"
-"f 4 \t5 \t8\n"
-"f 4 \t8 \t1\n"
-"f 2 \t7 \t6\n"
-"f 2 \t6 \t3\n"
-"f 4 \t3 \t6\n"
-"f 4 \t6 \t5\n"
-"f 8 \t7 \t2\n"
-"f 8 \t2 \t1\n"
-"# 12 faces\n"
-"\n"
-"#end of obj_0\n"
-"\n";
-
-const char* pianokey_rectangle_obj = (const char*) temp_binary_data_3;
-
 
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
 {
@@ -3443,8 +3313,6 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
     {
         case 0x40c51c28:  numBytes = 145904; return portmeirion_jpg;
         case 0x754c69fd:  numBytes = 95000; return teapot_obj;
-        case 0x3855e90e:  numBytes = 1152; return cylinder_obj;
-        case 0xc017361e:  numBytes = 420; return pianokey_rectangle_obj;
         default: break;
     }
 
@@ -3455,17 +3323,13 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
 const char* namedResourceList[] =
 {
     "portmeirion_jpg",
-    "teapot_obj",
-    "cylinder_obj",
-    "pianokey_rectangle_obj"
+    "teapot_obj"
 };
 
 const char* originalFilenames[] =
 {
     "portmeirion.jpg",
-    "teapot.obj",
-    "cylinder.obj",
-    "pianokey_rectangle.obj"
+    "teapot.obj"
 };
 
 const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8)
