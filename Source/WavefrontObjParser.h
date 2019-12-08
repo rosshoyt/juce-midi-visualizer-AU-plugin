@@ -35,12 +35,14 @@ public:
     
     Result load (const String& objFileContent)
     {
+        DBG("In load String& objFIleContnt");
         shapes.clear();
         return parseObjFile (StringArray::fromLines (objFileContent));
     }
     
     Result load (const File& file)
     {
+        DBG("In load constFile file");
         sourceFile = file;
         return load (file.loadFileAsString());
     }

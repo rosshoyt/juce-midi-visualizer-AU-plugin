@@ -156,9 +156,9 @@ struct OpenGLDemoClasses
      */
     struct Shape
     {
-        Shape (OpenGLContext& openGLContext)
+        Shape (OpenGLContext& openGLContext, const String& objFileContent)
         {
-            if (shapeFile.load (BinaryData::pianokey_rectangle_obj).wasOk())
+            if (shapeFile.load (objFileContent).wasOk())
                 for (int i = 0; i < shapeFile.shapes.size(); ++i)
                     vertexBuffers.add (new VertexBuffer (openGLContext, *shapeFile.shapes.getUnchecked(i)));
             
@@ -255,9 +255,13 @@ struct OpenGLDemoClasses
 class GLComponent : public Component, private OpenGLRenderer
 {
 public:
-    GLComponent(MidiKeyboardState &mKeybState) : rotation (0.0f), scale (0.5f), rotationSpeed (0.1f),
+    GLComponent(MidiKeyboardState &mKeybState) :
+                        //allwaysDisplayKeysButton("Always Display Keys"),
+                        rotation (0.0f), scale (0.5f), rotationSpeed (0.1f),
         textureToUse (nullptr), lastTexture (nullptr)
     {
+        
+        
         midiKeyboardState = &mKeybState;
         Array<ShaderPreset> shaders = getPresets();
         if (shaders.size() > 0)
@@ -284,7 +288,10 @@ public:
             delete lastTexture;
     }
     
+    bool drawPianoKeys = true;
 private:
+    
+    
     void newOpenGLContextCreated() override
     {
         freeAllContextObjects();
@@ -295,7 +302,7 @@ private:
         jassert (OpenGLHelpers::isContextActive());
         
         const float desktopScale = (float) openGLContext.getRenderingScale();
-        OpenGLHelpers::clear (Colours::lightblue);
+        OpenGLHelpers::clear (Colours::black);
         
         updateShader();   // Check whether we need to compile a new shader
         
@@ -331,8 +338,13 @@ private:
             
             if (uniforms->lightPosition != nullptr)
                 uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
-            if(midiKeyboardState->isNoteOn(1, i))
-            shape->draw (openGLContext, *attributes);
+            
+            // TODO could add automatic MidiChannel Sensing
+            if(midiKeyboardState->isNoteOn(1, i)){
+                if(drawPianoKeys) shapePianoKey->draw (openGLContext, *attributes);
+                else              shapeTeapot  ->draw (openGLContext, *attributes);
+            }
+            
         }
         
         // Reset the element buffers so child Components draw correctly
@@ -359,7 +371,7 @@ private:
     
     void freeAllContextObjects()
     {
-        shape = nullptr;
+        shapePianoKey = nullptr;
         shader = nullptr;
         attributes = nullptr;
         uniforms = nullptr;
@@ -371,7 +383,9 @@ private:
     float scale, rotationSpeed;
     
     ScopedPointer<OpenGLShaderProgram> shader;
-    ScopedPointer<OpenGLDemoClasses::Shape> shape;
+    ScopedPointer<OpenGLDemoClasses::Shape> shapePianoKey;
+    ScopedPointer<OpenGLDemoClasses::Shape> shapeTeapot;
+    
     ScopedPointer<OpenGLDemoClasses::Attributes> attributes;
     ScopedPointer<OpenGLDemoClasses::Uniforms> uniforms;
     
@@ -398,11 +412,11 @@ private:
         * Vector3D<float> (0.0f, 1.0f, -10.0f);
         
         float angle = 360.0f / 12.0f;
-        float rotY = angle * fundamentalPitch * DegreesToRadians;
+        float rotY = degreesToRadians(angle) * ((fundamentalPitch + 9) % 12);
         auto rotationMatrix = Matrix3D<float>::rotation ({ 1.55f, rotY, -1.55f });
         
         
-        float cylinderRadius = 1.0f;
+        float cylinderRadius = 2.0f;
         //x2 = x1 + cylinderRadius * cos(degreesToRadians(fundamentalPitch * angle));
         //y2 = y1 + cylinderRadius * sin(degreesToRadians(fundamentalPitch * angle));
         
@@ -414,11 +428,12 @@ private:
         
         
         
-        auto translationMatrix = Matrix3D<float> ({ 0, translateY, 0 });
+        auto translationVector = Matrix3D<float>(Vector3D<float> ({ translateX, translateY, translateZ}));
+                //Matrix3D<float> ({ 0, translateY, 0 });
         
         
         //auto translationMatrix2 = Matrix3D<float> ({ translateX, 0, translateZ});
-        return  rotationMatrix * translationMatrix * viewMatrix;
+        return  rotationMatrix * translationVector * viewMatrix;
         
     }
     const float DegreesToRadians = 3.14159265358f/180.f;
@@ -457,14 +472,16 @@ private:
                 && newShader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (newFragmentShader))
                 && newShader->link())
             {
-                shape = nullptr;
+                shapePianoKey = nullptr;
+                shapeTeapot = nullptr;
                 attributes = nullptr;
                 uniforms = nullptr;
                 
                 shader = newShader;
                 shader->use();
                 
-                shape      = new OpenGLDemoClasses::Shape (openGLContext);
+                shapePianoKey = new OpenGLDemoClasses::Shape (openGLContext, BinaryData::pianokey_rectangle_obj);
+                shapeTeapot   = new OpenGLDemoClasses::Shape (openGLContext, BinaryData::teapot_obj);
                 attributes = new OpenGLDemoClasses::Attributes (openGLContext, *shader);
                 uniforms   = new OpenGLDemoClasses::Uniforms (openGLContext, *shader);
                 
@@ -499,45 +516,90 @@ private:
         ShaderPreset presets[] =
         {
             {
-                "Simple Light",
-                
+                "Spiral Array Shader",
                 SHADER_DEMO_HEADER
                 "attribute vec4 position;\n"
-                "attribute vec4 normal;\n"
+                "attribute vec4 sourceColour;\n"
+                "attribute vec2 textureCoordIn;\n"
                 "\n"
                 "uniform mat4 projectionMatrix;\n"
                 "uniform mat4 viewMatrix;\n"
-                "uniform vec4 lightPosition;\n"
                 "\n"
-                "varying float lightIntensity;\n"
+                "varying vec4 destinationColour;\n"
+                "varying vec2 textureCoordOut;\n"
+                "\n"
+                "varying float xPos;\n"
+                "varying float yPos;\n"
+                "varying float zPos;\n"
                 "\n"
                 "void main()\n"
                 "{\n"
-                "    vec4 light = viewMatrix * lightPosition;\n"
-                "    lightIntensity = dot (light, normal);\n"
-                "\n"
+                "    vec4 v = vec4 (position);\n"
+                "    xPos = clamp (v.x, 0.0, 1.0);\n"
+                "    yPos = clamp (v.y, 0.0, 1.0);\n"
+                "    zPos = clamp (v.z, 0.0, 1.0);\n"
                 "    gl_Position = projectionMatrix * viewMatrix * position;\n"
-                "}\n",
+                "}",
                 
                 SHADER_DEMO_HEADER
 #if JUCE_OPENGL_ES
-                "varying highp float lightIntensity;\n"
+                "varying lowp vec4 destinationColour;\n"
+                "varying lowp vec2 textureCoordOut;\n"
+                "varying lowp float xPos;\n"
+                "varying lowp float yPos;\n"
+                "varying lowp float zPos;\n"
 #else
-                "varying float lightIntensity;\n"
+                "varying vec4 destinationColour;\n"
+                "varying vec2 textureCoordOut;\n"
+                "varying float xPos;\n"
+                "varying float yPos;\n"
+                "varying float zPos;\n"
 #endif
                 "\n"
                 "void main()\n"
                 "{\n"
-#if JUCE_OPENGL_ES
-                "   highp float l = lightIntensity * 0.25;\n"
-                "   highp vec4 colour = vec4 (l, l, l, 1.0);\n"
-#else
-                "   float l = lightIntensity * 0.25;\n"
-                "   vec4 colour = vec4 (l, l, l, 1.0);\n"
-#endif
-                "\n"
-                "    gl_FragColor = colour;\n"
-                "}\n"
+                "    gl_FragColor = vec4 (xPos, yPos, zPos, 1.0);\n"
+                "}"
+//                ,
+//                "Simple Light",
+//
+//                SHADER_DEMO_HEADER
+//                "attribute vec4 position;\n"
+//                "attribute vec4 normal;\n"
+//                "\n"
+//                "uniform mat4 projectionMatrix;\n"
+//                "uniform mat4 viewMatrix;\n"
+//                "uniform vec4 lightPosition;\n"
+//                "\n"
+//                "varying float lightIntensity;\n"
+//                "\n"
+//                "void main()\n"
+//                "{\n"
+//                "    vec4 light = viewMatrix * lightPosition;\n"
+//                "    lightIntensity = dot (light, normal);\n"
+//                "\n"
+//                "    gl_Position = projectionMatrix * viewMatrix * position;\n"
+//                "}\n",
+//
+//                SHADER_DEMO_HEADER
+//#if JUCE_OPENGL_ES
+//                "varying highp float lightIntensity;\n"
+//#else
+//                "varying float lightIntensity;\n"
+//#endif
+//                "\n"
+//                "void main()\n"
+//                "{\n"
+//#if JUCE_OPENGL_ES
+//                "   highp float l = lightIntensity * 0.25;\n"
+//                "   highp vec4 colour = vec4 (l, l, l, 1.0);\n"
+//#else
+//                "   float l = lightIntensity * 0.25;\n"
+//                "   vec4 colour = vec4 (l, l, l, 1.0);\n"
+//#endif
+//                "\n"
+//                "    gl_FragColor = colour;\n"
+//                "}\n"
             }
         };
         
@@ -567,13 +629,25 @@ GlpluginAudioProcessorEditor::GlpluginAudioProcessorEditor (GlpluginAudioProcess
 {
     glComponent = new GLComponent(midiKeyboardState);
     
-    //addAndMakeVisible (btn);
-    addAndMakeVisible (glComponent);
+    radioButtonsObjSelector = new GroupComponent ("OBJ Selector", "Use Obj File:");
+    addAndMakeVisible (radioButtonsObjSelector);
+    toggleButton_PianoKeyRectObj = new ToggleButton("Pianokey_rectangle.obj");
+    toggleButton_TeapotObj = new ToggleButton("Teapot.obj");
+    toggleButton_PianoKeyRectObj->setRadioGroupId(ObjSelectorButtons);
+    toggleButton_TeapotObj      ->setRadioGroupId(ObjSelectorButtons);
+    addAndMakeVisible(toggleButton_PianoKeyRectObj);
+    addAndMakeVisible(toggleButton_TeapotObj);
     
+    
+    toggleButton_PianoKeyRectObj->onClick = [this] { updateToggleState (toggleButton_PianoKeyRectObj,   "Pianokey_rectangle.obj");   };
+    toggleButton_TeapotObj      ->onClick = [this] { updateToggleState (toggleButton_TeapotObj, "Teapot.obj"); };
+    
+    toggleButton_PianoKeyRectObj->setToggleState(true, false);
+    
+    addAndMakeVisible (glComponent);
     addAndMakeVisible(midiKeyboardComponent);
     
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
+
     setSize (1000, 800);
 }
 
@@ -581,10 +655,28 @@ GlpluginAudioProcessorEditor::~GlpluginAudioProcessorEditor()
 {
     glComponent = nullptr;
 }
+void GlpluginAudioProcessorEditor::updateToggleState (Button* button, String name)
+{
 
+    //auto stateOn = button->getToggleState();
+    if(button->getToggleState())
+    {
+        if(name == "Pianokey_rectangle.obj") glComponent->drawPianoKeys = true;
+        else if(name == "Teapot.obj") glComponent->drawPianoKeys = false;
+    }
+    
+    //String stateString = state ? "ON" : "OFF";
+    //Logger::outputDebugString (name + " Button changed to " + stateString);
+}
 //==============================================================================
 void GlpluginAudioProcessorEditor::paint (Graphics& g)
 {}
+
+Rectangle<int> GlpluginAudioProcessorEditor::getSubdividedRegion(Rectangle<int> region, int numer, int denom)
+{
+    int newHeight = region.getHeight() / denom;
+    return Rectangle<int>(region.getX(), region.getY() + numer * newHeight, region.getWidth(), newHeight);
+}
 
 void GlpluginAudioProcessorEditor::resized()
 {
@@ -596,5 +688,21 @@ void GlpluginAudioProcessorEditor::resized()
     //midiKeyboardComponent.setBounds(r.removeFromTop())
     //btn.setBounds (r.removeFromTop (r.getHeight() >> 1));
     //glComponent->setBounds (0, r.getY() - keybHeight, r.getWidth(), r.getHeight());
-    glComponent->setBounds(r.removeFromBottom(r.getHeight() - keybHeight));
+    auto areaBelowKeyboard = r.removeFromBottom(r.getHeight() - (keybHeight + MARGIN));
+    
+    int leftToolbarWidth = r.getWidth() / 7;
+    
+    auto glArea = areaBelowKeyboard.removeFromRight(r.getWidth() - leftToolbarWidth);
+    glComponent->setBounds(glArea);
+    
+    auto leftButtonToolbarArea = areaBelowKeyboard.removeFromLeft(glArea.getWidth());
+    auto radioObjSelectorRegion = leftButtonToolbarArea.removeFromTop((BUTTON_HEIGHT * 2 + MARGIN*3));
+    radioObjSelectorRegion.translate(0, MARGIN);
+    radioButtonsObjSelector->setBounds (radioObjSelectorRegion);//MARGIN, keybHeight + MARGIN, 220, 140);
+    toggleButton_PianoKeyRectObj->setBounds(getSubdividedRegion(radioObjSelectorRegion, 1, 3));//
+    toggleButton_TeapotObj->setBounds (getSubdividedRegion(radioObjSelectorRegion, 2, 3));
+    //auto toggleButtonArea = radioObjSelectorRegion.withTrimmedBottom(radioObjSelectorRegion.getHeight() /2);
+    //toggleButton_PianoKeyRectObj->setBounds(toggleButtonArea.removeFromTop(MARGIN));//radioObjSelectorRegion.removeFromTop(MARGIN));
+    //toggleButtonArea.setTop(toggleButtonArea.getY() + BUTTON_HEIGHT);
+    //toggleButton_TeapotObj->setBounds (toggleButtonArea);//radioObjSelectorRegion.withTrimmedTop(BUTTON_HEIGHT + 2 * MARGIN));
 }
