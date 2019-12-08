@@ -58,6 +58,8 @@ public:
 
 private:
     //==============================================================================
+    MidiKeyboardState midiKeyboardState;
+    int midiSampleCounter;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlpluginAudioProcessor)
 };
 

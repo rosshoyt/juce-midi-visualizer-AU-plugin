@@ -9,7 +9,7 @@
               pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="GLPluginAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.GLPlugin"
               pluginAAXCategory="2" jucerVersion="5.4.5" pluginFormats="buildAU,buildStandalone"
-              buildStandalone="1" enableIAA="0">
+              buildStandalone="1" enableIAA="0" pluginCharacteristicsValue="pluginProducesMidiOut,pluginWantsMidiIn">
   <MAINGROUP id="snosp0" name="GLPlugin">
     <GROUP id="{10B53D3B-D2A8-6E5A-3C25-C4A55D52FBBF}" name="Source">
       <FILE id="IpKrt5" name="portmeirion.jpg" compile="0" resource="1" file="Source/portmeirion.jpg"/>

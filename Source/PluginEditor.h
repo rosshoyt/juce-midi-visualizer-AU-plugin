@@ -23,7 +23,7 @@ class GLComponent;
 class GlpluginAudioProcessorEditor  : public AudioProcessorEditor
 {
 public:
-    GlpluginAudioProcessorEditor (GlpluginAudioProcessor&);
+    GlpluginAudioProcessorEditor (GlpluginAudioProcessor&, MidiKeyboardState&);
     ~GlpluginAudioProcessorEditor();
 
     //==============================================================================
@@ -37,7 +37,7 @@ private:
 
 
     MidiKeyboardComponent midiKeyboardComponent;
-    MidiKeyboardState midiKeyboardState;
+    MidiKeyboardState * midiKeyboardState;
     
     ScopedPointer<GLComponent> glComponent;
     

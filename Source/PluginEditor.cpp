@@ -255,10 +255,10 @@ struct OpenGLDemoClasses
 class GLComponent : public Component, private OpenGLRenderer
 {
 public:
-    GLComponent() : rotation (0.0f), scale (0.5f), rotationSpeed (0.1f),
+    GLComponent(MidiKeyboardState &mKeybState) : rotation (0.0f), scale (0.5f), rotationSpeed (0.1f),
         textureToUse (nullptr), lastTexture (nullptr)
     {
-        
+        midiKeyboardState = &mKeybState;
         Array<ShaderPreset> shaders = getPresets();
         if (shaders.size() > 0)
         {
@@ -331,7 +331,7 @@ private:
             
             if (uniforms->lightPosition != nullptr)
                 uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
-            
+            if(midiKeyboardState->isNoteOn(1, i))
             shape->draw (openGLContext, *attributes);
         }
         
@@ -407,7 +407,7 @@ private:
         //y2 = y1 + cylinderRadius * sin(degreesToRadians(fundamentalPitch * angle));
         
         float translateX = 0;//cylinderRadius * sin(degreesToRadians(fundamentalPitch * angle));
-        float translateY = i * -.5f + 20.0f;
+        float translateY = i * -.5f + 15.0f;
         float translateZ = 0;//cylinderRadius * cos(degreesToRadians(fundamentalPitch * angle));
         
         auto translationMatrix = Matrix3D<float> ({ translateX, translateY, translateZ });
@@ -545,15 +545,20 @@ private:
     {
         draggableOrientation.mouseDrag (e.getPosition());
     }
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& d) override
+    {
+        scale += d.deltaY;
+    }
+    MidiKeyboardState * midiKeyboardState;
     
 };
 
 
 //==============================================================================
-GlpluginAudioProcessorEditor::GlpluginAudioProcessorEditor (GlpluginAudioProcessor& p)
+GlpluginAudioProcessorEditor::GlpluginAudioProcessorEditor (GlpluginAudioProcessor& p, MidiKeyboardState& midiKeyboardState)
 : AudioProcessorEditor (&p), processor (p), midiKeyboardComponent(midiKeyboardState, MidiKeyboardComponent::horizontalKeyboard)
 {
-    glComponent = new GLComponent;
+    glComponent = new GLComponent(midiKeyboardState);
     
     //addAndMakeVisible (btn);
     addAndMakeVisible (glComponent);

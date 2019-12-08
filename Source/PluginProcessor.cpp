@@ -125,7 +125,10 @@ void GlpluginAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer
 {
     const int totalNumInputChannels  = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
-
+    
+    int numMidiEvents = midiMessages.getNumEvents();
+    midiKeyboardState.processNextMidiBuffer(midiMessages, midiSampleCounter, numMidiEvents, true);
+    midiSampleCounter += numMidiEvents;
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
@@ -153,7 +156,7 @@ bool GlpluginAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* GlpluginAudioProcessor::createEditor()
 {
-    return new GlpluginAudioProcessorEditor (*this);
+    return new GlpluginAudioProcessorEditor (*this, midiKeyboardState);
 }
 
 //==============================================================================
