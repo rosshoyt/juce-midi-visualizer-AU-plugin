@@ -406,11 +406,18 @@ private:
         //x2 = x1 + cylinderRadius * cos(degreesToRadians(fundamentalPitch * angle));
         //y2 = y1 + cylinderRadius * sin(degreesToRadians(fundamentalPitch * angle));
         
-        float translateX = 0;//cylinderRadius * sin(degreesToRadians(fundamentalPitch * angle));
-        float translateY = i * -.5f + 15.0f;
-        float translateZ = 0;//cylinderRadius * cos(degreesToRadians(fundamentalPitch * angle));
         
-        auto translationMatrix = Matrix3D<float> ({ translateX, translateY, translateZ });
+        float translateY = i * -.5f + 30.0f;
+        
+        float translateX = cylinderRadius * sin(degreesToRadians(fundamentalPitch * angle));
+        float translateZ = cylinderRadius * cos(degreesToRadians(fundamentalPitch * angle));
+        
+        
+        
+        auto translationMatrix = Matrix3D<float> ({ 0, translateY, 0 });
+        
+        
+        //auto translationMatrix2 = Matrix3D<float> ({ translateX, 0, translateZ});
         return  rotationMatrix * translationMatrix * viewMatrix;
         
     }
