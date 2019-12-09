@@ -12,6 +12,16 @@
               buildStandalone="1" enableIAA="0" pluginCharacteristicsValue="pluginProducesMidiOut,pluginWantsMidiIn">
   <MAINGROUP id="snosp0" name="GLPlugin">
     <GROUP id="{10B53D3B-D2A8-6E5A-3C25-C4A55D52FBBF}" name="Source">
+      <GROUP id="{9A566155-ECF4-D247-29CC-8130EE9E483D}" name="OpenGL">
+        <FILE id="H8TL8U" name="Attributes.h" compile="0" resource="0" file="Source/Attributes.h"/>
+        <FILE id="m9jtiJ" name="Shape.h" compile="0" resource="0" file="Source/Shape.h"/>
+        <FILE id="Yb8Czq" name="GLUtils.h" compile="0" resource="0" file="Source/GLUtils.h"/>
+        <FILE id="dS9MtO" name="Textures.h" compile="0" resource="0" file="Source/Textures.h"/>
+        <FILE id="WPORFY" name="Uniforms.h" compile="0" resource="0" file="Source/Uniforms.h"/>
+        <FILE id="Q0NKnd" name="Vertex.h" compile="0" resource="0" file="Source/Vertex.h"/>
+      </GROUP>
+      <FILE id="E6lron" name="SusKeyboardState.h" compile="0" resource="0"
+            file="Source/SusKeyboardState.h"/>
       <FILE id="IpKrt5" name="portmeirion.jpg" compile="0" resource="1" file="Source/portmeirion.jpg"/>
       <FILE id="fSqP7u" name="teapot.obj" compile="0" resource="1" file="Source/teapot.obj"/>
       <FILE id="jgHuHz" name="WavefrontObjParser.h" compile="0" resource="0"

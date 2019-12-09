@@ -10,252 +10,19 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-
 #include "WavefrontObjParser.h"
+#include "Shape.h"
+#include "Textures.h"
+#include "Uniforms.h"
+#include "Attributes.h"
+
 
 //==============================================================================
-struct OpenGLDemoClasses
-{
-    /** Vertex data to be passed to the shaders.
-     For the purposes of this demo, each vertex will have a 3D position, a colour and a
-     2D texture co-ordinate. Of course you can ignore these or manipulate them in the
-     shader programs but are some useful defaults to work from.
-     */
-    struct Vertex
-    {
-        float position[3];
-        float normal[3];
-        float colour[4];
-        float texCoord[2];
-    };
-    
-    //==============================================================================
-    // This class just manages the attributes that the demo shaders use.
-    struct Attributes
-    {
-        Attributes (OpenGLContext& openGLContext, OpenGLShaderProgram& shader)
-        {
-            position      = createAttribute (openGLContext, shader, "position");
-            normal        = createAttribute (openGLContext, shader, "normal");
-            sourceColour  = createAttribute (openGLContext, shader, "sourceColour");
-            texureCoordIn = createAttribute (openGLContext, shader, "texureCoordIn");
-        }
-        
-        void enable (OpenGLContext& openGLContext)
-        {
-            if (position != nullptr)
-            {
-                openGLContext.extensions.glVertexAttribPointer (position->attributeID, 3, GL_FLOAT, GL_FALSE, sizeof (Vertex), 0);
-                openGLContext.extensions.glEnableVertexAttribArray (position->attributeID);
-            }
-            
-            if (normal != nullptr)
-            {
-                openGLContext.extensions.glVertexAttribPointer (normal->attributeID, 3, GL_FLOAT, GL_FALSE, sizeof (Vertex), (GLvoid*) (sizeof (float) * 3));
-                openGLContext.extensions.glEnableVertexAttribArray (normal->attributeID);
-            }
-            
-            if (sourceColour != nullptr)
-            {
-                openGLContext.extensions.glVertexAttribPointer (sourceColour->attributeID, 4, GL_FLOAT, GL_FALSE, sizeof (Vertex), (GLvoid*) (sizeof (float) * 6));
-                openGLContext.extensions.glEnableVertexAttribArray (sourceColour->attributeID);
-            }
-            
-            if (texureCoordIn != nullptr)
-            {
-                openGLContext.extensions.glVertexAttribPointer (texureCoordIn->attributeID, 2, GL_FLOAT, GL_FALSE, sizeof (Vertex), (GLvoid*) (sizeof (float) * 10));
-                openGLContext.extensions.glEnableVertexAttribArray (texureCoordIn->attributeID);
-            }
-        }
-        
-        void disable (OpenGLContext& openGLContext)
-        {
-            if (position != nullptr)       openGLContext.extensions.glDisableVertexAttribArray (position->attributeID);
-            if (normal != nullptr)         openGLContext.extensions.glDisableVertexAttribArray (normal->attributeID);
-            if (sourceColour != nullptr)   openGLContext.extensions.glDisableVertexAttribArray (sourceColour->attributeID);
-            if (texureCoordIn != nullptr)  openGLContext.extensions.glDisableVertexAttribArray (texureCoordIn->attributeID);
-        }
-        
-        ScopedPointer<OpenGLShaderProgram::Attribute> position, normal, sourceColour, texureCoordIn;
-        
-    private:
-        static OpenGLShaderProgram::Attribute* createAttribute (OpenGLContext& openGLContext,
-                                                                OpenGLShaderProgram& shader,
-                                                                const char* attributeName)
-        {
-            if (openGLContext.extensions.glGetAttribLocation (shader.getProgramID(), attributeName) < 0)
-                return nullptr;
-            
-            return new OpenGLShaderProgram::Attribute (shader, attributeName);
-        }
-    };
-    
-    //==============================================================================
-    // This class just manages the uniform values that the demo shaders use.
-    struct Uniforms
-    {
-        Uniforms (OpenGLContext& openGLContext, OpenGLShaderProgram& shader)
-        {
-            projectionMatrix = createUniform (openGLContext, shader, "projectionMatrix");
-            viewMatrix       = createUniform (openGLContext, shader, "viewMatrix");
-            texture          = createUniform (openGLContext, shader, "demoTexture");
-            lightPosition    = createUniform (openGLContext, shader, "lightPosition");
-        }
-        
-        ScopedPointer<OpenGLShaderProgram::Uniform> projectionMatrix, viewMatrix, texture, lightPosition;
-        
-    private:
-        static OpenGLShaderProgram::Uniform* createUniform (OpenGLContext& openGLContext,
-                                                            OpenGLShaderProgram& shader,
-                                                            const char* uniformName)
-        {
-            if (openGLContext.extensions.glGetUniformLocation (shader.getProgramID(), uniformName) < 0)
-                return nullptr;
-            
-            return new OpenGLShaderProgram::Uniform (shader, uniformName);
-        }
-    };
-    
-    struct DemoTexture
-    {
-        virtual ~DemoTexture() {}
-        virtual bool applyTo (OpenGLTexture&) = 0;
-        
-        String name;
-    };
-    
-    struct BuiltInTexture   : public DemoTexture
-    {
-        BuiltInTexture (const char* nm, const void* imageData, size_t imageSize)
-        : image (resizeImageToPowerOfTwo (ImageFileFormat::loadFrom (imageData, imageSize)))
-        {
-            name = nm;
-        }
-        
-        Image image;
-        
-        bool applyTo (OpenGLTexture& texture) override
-        {
-            texture.loadImage (image);
-            return false;
-        }
-    };
-    
-    static Image resizeImageToPowerOfTwo (Image image)
-    {
-        if (! (isPowerOfTwo (image.getWidth()) && isPowerOfTwo (image.getHeight())))
-            return image.rescaled (jmin (1024, nextPowerOfTwo (image.getWidth())),
-                                   jmin (1024, nextPowerOfTwo (image.getHeight())));
-        
-        return image;
-    }
-    
-    //==============================================================================
-    /** This loads a 3D model from an OBJ file and converts it into some vertex buffers
-     that we can draw.
-     */
-    struct Shape
-    {
-        Shape (OpenGLContext& openGLContext, const String& objFileContent)
-        {
-            if (shapeFile.load (objFileContent).wasOk())
-                for (int i = 0; i < shapeFile.shapes.size(); ++i)
-                    vertexBuffers.add (new VertexBuffer (openGLContext, *shapeFile.shapes.getUnchecked(i)));
-            
-        }
-        
-        void draw (OpenGLContext& openGLContext, Attributes& attributes)
-        {
-            for (int i = 0; i < vertexBuffers.size(); ++i)
-            {
-                VertexBuffer& vertexBuffer = *vertexBuffers.getUnchecked (i);
-                vertexBuffer.bind();
-                
-                attributes.enable (openGLContext);
-                glDrawElements (GL_TRIANGLES, vertexBuffer.numIndices, GL_UNSIGNED_INT, 0);
-                attributes.disable (openGLContext);
-            }
-        }
-        
-    private:
-        struct VertexBuffer
-        {
-            VertexBuffer (OpenGLContext& context, WavefrontObjFile::Shape& shape) : openGLContext (context)
-            {
-                numIndices = shape.mesh.indices.size();
-                
-                openGLContext.extensions.glGenBuffers (1, &vertexBuffer);
-                openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, vertexBuffer);
-                
-                Array<Vertex> vertices;
-                createVertexListFromMesh (shape.mesh, vertices, Colours::green);
-                
-                openGLContext.extensions.glBufferData (GL_ARRAY_BUFFER, vertices.size() * (int) sizeof (Vertex),
-                                                       vertices.getRawDataPointer(), GL_STATIC_DRAW);
-                
-                openGLContext.extensions.glGenBuffers (1, &indexBuffer);
-                openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-                openGLContext.extensions.glBufferData (GL_ELEMENT_ARRAY_BUFFER, numIndices * (int) sizeof (juce::uint32),
-                                                       shape.mesh.indices.getRawDataPointer(), GL_STATIC_DRAW);
-            }
-            
-            ~VertexBuffer()
-            {
-                openGLContext.extensions.glDeleteBuffers (1, &vertexBuffer);
-                openGLContext.extensions.glDeleteBuffers (1, &indexBuffer);
-            }
-            
-            void bind()
-            {
-                openGLContext.extensions.glBindBuffer (GL_ARRAY_BUFFER, vertexBuffer);
-                openGLContext.extensions.glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-            }
-            
-            GLuint vertexBuffer, indexBuffer;
-            int numIndices;
-            OpenGLContext& openGLContext;
-            
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VertexBuffer)
-        };
-        
-        WavefrontObjFile shapeFile;
-        OwnedArray<VertexBuffer> vertexBuffers;
-        
-        static void createVertexListFromMesh (const WavefrontObjFile::Mesh& mesh, Array<Vertex>& list, Colour colour)
-        {
-            const float scale = 0.2f;
-            WavefrontObjFile::TextureCoord defaultTexCoord = { 0.5f, 0.5f };
-            WavefrontObjFile::Vertex defaultNormal = { 0.5f, 0.5f, 0.5f };
-            
-            for (int i = 0; i < mesh.vertices.size(); ++i)
-            {
-                const WavefrontObjFile::Vertex& v = mesh.vertices.getReference (i);
-                
-                const WavefrontObjFile::Vertex& n
-                = i < mesh.normals.size() ? mesh.normals.getReference (i) : defaultNormal;
-                
-                const WavefrontObjFile::TextureCoord& tc
-                = i < mesh.textureCoords.size() ? mesh.textureCoords.getReference (i) : defaultTexCoord;
-                
-                Vertex vert =
-                {
-                    { scale * v.x, scale * v.y, scale * v.z, },
-                    { scale * n.x, scale * n.y, scale * n.z, },
-                    { colour.getFloatRed(), colour.getFloatGreen(), colour.getFloatBlue(), colour.getFloatAlpha() },
-                    { tc.x, tc.y }
-                };
-                
-                list.add (vert);
-            }
-        }
-    };
-    
-};
 
 class GLComponent : public Component, private OpenGLRenderer, public Slider::Listener
 {
 public:
-    GLComponent(MidiKeyboardState &mKeybState, GlpluginAudioProcessorEditor *par) :
+    GLComponent(MidiKeyboardState &mKeybState, GlmidipluginEditor *par) :
                         //allwaysDisplayKeysButton("Always Display Keys"),
                         rotation (0.0f), scale (0.5f), rotationSpeed (0.1f),
         textureToUse (nullptr), lastTexture (nullptr)
@@ -270,7 +37,7 @@ public:
             newFragmentShader = shaders.getReference (0).fragmentShader;
         }
         
-        lastTexture = textureToUse = new OpenGLDemoClasses::BuiltInTexture ("Portmeirion", BinaryData::portmeirion_jpg, BinaryData::portmeirion_jpgSize);
+        lastTexture = textureToUse = new BuiltInTexture ("Portmeirion", BinaryData::portmeirion_jpg, BinaryData::portmeirion_jpgSize);
         
         openGLContext.setComponentPaintingEnabled (false);
         openGLContext.setContinuousRepainting (true);
@@ -302,15 +69,13 @@ private:
         jassert (OpenGLHelpers::isContextActive());
         
         const float desktopScale = (float) openGLContext.getRenderingScale();
-        OpenGLHelpers::clear (Colours::black);
+        OpenGLHelpers::clear (Colours::burlywood);
         
         updateShader();   // Check whether we need to compile a new shader
         
         if (shader == nullptr)
             return;
         
-        // Having used the juce 2D renderer, it will have messed-up a whole load of GL state, so
-        // we need to initialise some important settings before doing our normal GL 3D drawing..
         glEnable (GL_DEPTH_TEST);
         glDepthFunc (GL_LESS);
         glEnable (GL_BLEND);
@@ -325,21 +90,23 @@ private:
         glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         
         shader->use();
-        for(int i = 0; i < 128; i++){
-            
-            if (uniforms->projectionMatrix != nullptr)
-                uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
-            
-            if (uniforms->viewMatrix != nullptr)
+        
+        if (uniforms->projectionMatrix != nullptr)
+            uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
+        
+        if (uniforms->texture != nullptr)
+            uniforms->texture->set ((GLint) 0);
+        
+        if (uniforms->lightPosition != nullptr)
+            uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
+        
+        
+        for(int i = 0; i < 128; i++)
+        {
+            // TODO could add automatic MidiChannel Sensing
+                if (uniforms->viewMatrix != nullptr)
                 uniforms->viewMatrix->setMatrix4 (getViewMatrix(i).mat, 1, false);
             
-            if (uniforms->texture != nullptr)
-                uniforms->texture->set ((GLint) 0);
-            
-            if (uniforms->lightPosition != nullptr)
-                uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
-            
-            // TODO could add automatic MidiChannel Sensing
             if(midiKeyboardState->isNoteOn(1, i)){
                 if(drawPianoKeys) shapePianoKey->draw (openGLContext, *attributes);
                 else              shapeTeapot  ->draw (openGLContext, *attributes);
@@ -364,7 +131,7 @@ private:
     
     void paint(Graphics& g) override {}
     
-    void setTexture (OpenGLDemoClasses::DemoTexture* t)
+    void setTexture (DemoTexture* t)
     {
         lastTexture = textureToUse = t;
     }
@@ -383,14 +150,14 @@ private:
     float scale, rotationSpeed;
     
     ScopedPointer<OpenGLShaderProgram> shader;
-    ScopedPointer<OpenGLDemoClasses::Shape> shapePianoKey;
-    ScopedPointer<OpenGLDemoClasses::Shape> shapeTeapot;
+    ScopedPointer<Shape> shapePianoKey;
+    ScopedPointer<Shape> shapeTeapot;
     
-    ScopedPointer<OpenGLDemoClasses::Attributes> attributes;
-    ScopedPointer<OpenGLDemoClasses::Uniforms> uniforms;
+    ScopedPointer<Attributes> attributes;
+    ScopedPointer<Uniforms> uniforms;
     
     OpenGLTexture texture;
-    OpenGLDemoClasses::DemoTexture* textureToUse, *lastTexture;
+    DemoTexture* textureToUse, *lastTexture;
     
     String newVertexShader, newFragmentShader;
     
@@ -436,7 +203,6 @@ private:
         return  rotationMatrix * translationVector * viewMatrix;
         
     }
-    const float DegreesToRadians = 3.14159265358f/180.f;
 //    Matrix3D<float> getProjectionMatrix() const
 //    {
 //        float w = 1.0f / (scale + 0.1f);
@@ -480,10 +246,10 @@ private:
                 shader = newShader;
                 shader->use();
                 
-                shapePianoKey = new OpenGLDemoClasses::Shape (openGLContext, BinaryData::pianokey_rectangle_obj);
-                shapeTeapot   = new OpenGLDemoClasses::Shape (openGLContext, BinaryData::teapot_obj);
-                attributes = new OpenGLDemoClasses::Attributes (openGLContext, *shader);
-                uniforms   = new OpenGLDemoClasses::Uniforms (openGLContext, *shader);
+                shapePianoKey = new Shape (openGLContext, BinaryData::pianokey_rectangle_obj);
+                shapeTeapot   = new Shape (openGLContext, BinaryData::teapot_obj);
+                attributes = new Attributes (openGLContext, *shader);
+                uniforms   = new Uniforms (openGLContext, *shader);
                 
                 statusText = "GLSL: v" + String (OpenGLShaderProgram::getLanguageVersion(), 2);
             }
@@ -628,35 +394,36 @@ private:
         parent->zoomSlider.setValue(parent->zoomSlider.getValue() + d.deltaY);
     }
     MidiKeyboardState * midiKeyboardState;
-    GlpluginAudioProcessorEditor *parent;
+    GlmidipluginEditor *parent;
 };
 
 
 //==============================================================================
-GlpluginAudioProcessorEditor::GlpluginAudioProcessorEditor (GlpluginAudioProcessor& p, MidiKeyboardState& midiKeyboardState)
+GlmidipluginEditor::GlmidipluginEditor (GlmidipluginProcessor& p, MidiKeyboardState& midiKeyboardState)
 : AudioProcessorEditor (&p), processor (p), midiKeyboardComponent(midiKeyboardState, MidiKeyboardComponent::horizontalKeyboard)
 {
+    // MIDI KEYBOARD DISPLAY
     addAndMakeVisible(midiKeyboardComponent);
-    // MAIN OPENGL DISPLAY
+    
+    // OPENGL DISPLAY
     glComponent = new GLComponent(midiKeyboardState, this);
     addAndMakeVisible (glComponent);
-    // OBJ SELECTOR RADIO BOX
+    
+    // OBJ FILE SELECTOR (RADIO BOX)
     radioButtonsObjSelector = new GroupComponent ("OBJ Selector", "Use Obj File:");
     addAndMakeVisible (radioButtonsObjSelector);
     toggleButton_PianoKeyRectObj = new ToggleButton("Pianokey_rectangle.obj");
     toggleButton_TeapotObj = new ToggleButton("Teapot.obj");
     toggleButton_PianoKeyRectObj->setRadioGroupId(ObjSelectorButtons);
     toggleButton_TeapotObj      ->setRadioGroupId(ObjSelectorButtons);
-    addAndMakeVisible(toggleButton_PianoKeyRectObj);
-    addAndMakeVisible(toggleButton_TeapotObj);
     toggleButton_PianoKeyRectObj->onClick = [this] { updateToggleState (toggleButton_PianoKeyRectObj,   "Pianokey_rectangle.obj");   };
     toggleButton_TeapotObj      ->onClick = [this] { updateToggleState (toggleButton_TeapotObj, "Teapot.obj"); };
-    
+    addAndMakeVisible(toggleButton_PianoKeyRectObj);
+    addAndMakeVisible(toggleButton_TeapotObj);
     
     // ZOOM SLIDER
     addAndMakeVisible (zoomSlider);
     zoomSlider.setRange (0.0, 1.0, 0.001);
-    //zoomLabel.setText("Zoom:", NotificationType::dontSendNotification);
     zoomSlider.addListener (glComponent);
     zoomSlider.setSliderStyle(Slider::LinearVertical);
     zoomLabel.attachToComponent (&zoomSlider, false);
@@ -669,16 +436,16 @@ GlpluginAudioProcessorEditor::GlpluginAudioProcessorEditor (GlpluginAudioProcess
     
     initialise();
     
-
+    setResizable(true, true);
     setSize (1000, 800);
 }
 
-GlpluginAudioProcessorEditor::~GlpluginAudioProcessorEditor()
+GlmidipluginEditor::~GlmidipluginEditor()
 {
     glComponent = nullptr;
 }
 
-void GlpluginAudioProcessorEditor::initialise()
+void GlmidipluginEditor::initialise()
 {
     toggleButton_PianoKeyRectObj->setToggleState(true, false);
     zoomSlider .setValue (0.5);
@@ -687,7 +454,7 @@ void GlpluginAudioProcessorEditor::initialise()
     
 }
 
-void GlpluginAudioProcessorEditor::updateToggleState (Button* button, String name)
+void GlmidipluginEditor::updateToggleState (Button* button, String name)
 {
 
     //auto stateOn = button->getToggleState();
@@ -701,10 +468,12 @@ void GlpluginAudioProcessorEditor::updateToggleState (Button* button, String nam
     //Logger::outputDebugString (name + " Button changed to " + stateString);
 }
 //==============================================================================
-void GlpluginAudioProcessorEditor::paint (Graphics& g)
-{}
+void GlmidipluginEditor::paint (Graphics& g)
+{
+    g.fillAll(backgroundColor);
+}
 
-Rectangle<int> GlpluginAudioProcessorEditor::getSubdividedRegion(Rectangle<int> region, int numer, int denom, SubdividedOrientation orientation)
+Rectangle<int> GlmidipluginEditor::getSubdividedRegion(Rectangle<int> region, int numer, int denom, SubdividedOrientation orientation)
 {
     int x, y, height, width;
     if(orientation == Vertical)
@@ -724,7 +493,7 @@ Rectangle<int> GlpluginAudioProcessorEditor::getSubdividedRegion(Rectangle<int> 
     return Rectangle<int>(x, y, width, height);
 }
 
-void GlpluginAudioProcessorEditor::resized()
+void GlmidipluginEditor::resized()
 {
     Rectangle<int> r = getLocalBounds();
     float resizedKeybWidth = r.getWidth() - MARGIN * 2, resizedKeybHeight = r.getHeight() - 5;

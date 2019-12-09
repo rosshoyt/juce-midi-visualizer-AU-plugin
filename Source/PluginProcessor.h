@@ -17,12 +17,12 @@
 //==============================================================================
 /**
 */
-class GlpluginAudioProcessor  : public AudioProcessor
+class GlmidipluginProcessor  : public AudioProcessor
 {
 public:
     //==============================================================================
-    GlpluginAudioProcessor();
-    ~GlpluginAudioProcessor();
+    GlmidipluginProcessor();
+    ~GlmidipluginProcessor();
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -60,7 +60,7 @@ private:
     //==============================================================================
     MidiKeyboardState midiKeyboardState;
     int midiSampleCounter;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlpluginAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlmidipluginProcessor)
 };
 
 

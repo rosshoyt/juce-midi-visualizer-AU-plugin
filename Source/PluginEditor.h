@@ -20,11 +20,11 @@
 */
 class GLComponent;
 
-class GlpluginAudioProcessorEditor  : public AudioProcessorEditor
+class GlmidipluginEditor  : public AudioProcessorEditor
 {
 public:
-    GlpluginAudioProcessorEditor (GlpluginAudioProcessor&, MidiKeyboardState&);
-    ~GlpluginAudioProcessorEditor();
+    GlmidipluginEditor (GlmidipluginProcessor&, MidiKeyboardState&);
+    ~GlmidipluginEditor();
 
     //==============================================================================
     void paint (Graphics&) override;
@@ -51,7 +51,7 @@ private:
     
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    GlpluginAudioProcessor& processor;
+    GlmidipluginProcessor& processor;
     
 
     MidiKeyboardComponent midiKeyboardComponent;
@@ -59,15 +59,16 @@ private:
     
     ScopedPointer<GLComponent> glComponent;
     
-    // Display Constants
+    // GUI constants
     static const int MARGIN = 4, MAX_WINDOW_HEIGHT = 800, MAX_WINDOW_WIDTH = 1200 + 2 * MARGIN,
     MAX_KEYB_WIDTH = 1200, MAX_KEYB_HEIGHT = 82, BUTTON_WIDTH = 50, BUTTON_HEIGHT = 30;
+    Colour backgroundColor { 44,54,60 }; // stock bckgrd colour
     
     // Display Helper Method
     enum SubdividedOrientation { Vertical, Horizontal};
     static Rectangle<int> getSubdividedRegion(const Rectangle<int>, int, int, SubdividedOrientation);
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlpluginAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlmidipluginEditor)
 };
 
 
