@@ -56,6 +56,10 @@ public:
     }
     
     bool drawPianoKeys = true;
+    bool drawControlMesh = true;
+    
+    
+    
 private:
     
     
@@ -109,13 +113,15 @@ private:
             
             if(drawPianoKeys)
             {
-                shapePianoKey->drawControlMesh(openGLContext, *attributes);
+                if(drawControlMesh)
+                    shapePianoKey->drawControlMesh(openGLContext, *attributes);
                 if(midiKeyboardState->isNoteOn(1, i))
                     shapePianoKey->draw (openGLContext, *attributes);
             }
             else
             {
-                shapeTeapot->drawControlMesh(openGLContext, *attributes);
+                if(drawControlMesh)
+                    shapeTeapot->drawControlMesh(openGLContext, *attributes);
                 if(midiKeyboardState->isNoteOn(1, i))
                     shapeTeapot->draw(openGLContext, *attributes);
             }
@@ -277,7 +283,7 @@ private:
         const char* name;
         const char* vertexShader;
         const char* fragmentShader;
-        const char* geometryShader;
+        //const char* geometryShader;
     };
     
     static Array<ShaderPreset> getPresets()
@@ -329,6 +335,7 @@ private:
                 "\n"
                 "void main()\n"
                 "{\n"
+                "//  gl_FragColor = vec4 (xPos, yPos, zPos, 1.0);\n"
                 "    gl_FragColor = vec4 (xPos, yPos, zPos, 1.0);\n"
                 "}",
 //                ,
@@ -407,34 +414,37 @@ private:
 GlmidipluginEditor::GlmidipluginEditor (GlmidipluginProcessor& p, MidiKeyboardState& midiKeyboardState)
 : AudioProcessorEditor (&p), processor (p), midiKeyboardComponent(midiKeyboardState, MidiKeyboardComponent::horizontalKeyboard)
 {
-    // MIDI KEYBOARD DISPLAY
+    // TOP MIDI KEYBOARD DISPLAY
     addAndMakeVisible(midiKeyboardComponent);
     
-    // OPENGL DISPLAY
+    // BOTTOM RIGHT - OPENGL DISPLAY
     glComponent = new GLComponent(midiKeyboardState, this);
     addAndMakeVisible (glComponent);
     
-    // OBJ FILE SELECTOR (RADIO BOX)
+    // LEFT - OBJ FILE SELECTOR (RADIO BOX GROUP)
     radioButtonsObjSelector = new GroupComponent ("OBJ Selector", "Use Obj File:");
     addAndMakeVisible (radioButtonsObjSelector);
-    toggleButton_PianoKeyRectObj = new ToggleButton("Pianokey_rectangle.obj");
-    toggleButton_TeapotObj = new ToggleButton("Teapot.obj");
-    toggleButton_PianoKeyRectObj->setRadioGroupId(ObjSelectorButtons);
-    toggleButton_TeapotObj      ->setRadioGroupId(ObjSelectorButtons);
-    toggleButton_PianoKeyRectObj->onClick = [this] { updateToggleState (toggleButton_PianoKeyRectObj,   "Pianokey_rectangle.obj");   };
-    toggleButton_TeapotObj      ->onClick = [this] { updateToggleState (toggleButton_TeapotObj, "Teapot.obj"); };
-    addAndMakeVisible(toggleButton_PianoKeyRectObj);
-    addAndMakeVisible(toggleButton_TeapotObj);
+    togglePianoKeyObj = new ToggleButton("Pianokey_rectangle.obj");
+    toggleTeapotObj   = new ToggleButton("Teapot.obj");
+    togglePianoKeyObj->setRadioGroupId(ObjSelectorButtons);
+    toggleTeapotObj  ->setRadioGroupId(ObjSelectorButtons);
+    togglePianoKeyObj->onClick = [this] { updateToggleState (togglePianoKeyObj,   "Pianokey_rectangle.obj");   };
+    toggleTeapotObj  ->onClick = [this] { updateToggleState (toggleTeapotObj, "Teapot.obj"); };
+    addAndMakeVisible(togglePianoKeyObj);
+    addAndMakeVisible(toggleTeapotObj);
     
-    // ZOOM SLIDER
+    // LEFT - ZOOM SLIDER
     addAndMakeVisible (zoomSlider);
     zoomSlider.setRange (0.0, 1.0, 0.001);
     zoomSlider.addListener (glComponent);
-    zoomSlider.setSliderStyle(Slider::LinearVertical);
+    zoomSlider.setSliderStyle (Slider::LinearVertical);
     zoomLabel.attachToComponent (&zoomSlider, false);
     addAndMakeVisible (zoomLabel);
     
-    // SLIDER
+    // LEFT RADIO BOX: Draw Control Mesh
+    toggleDrawControlMesh = new ToggleButton("Draw Control Mesh");
+    toggleDrawControlMesh->onClick = [this] { updateToggleState (toggleDrawControlMesh, "Draw Control Mesh");   };
+    addAndMakeVisible(toggleDrawControlMesh);
     
     
     
@@ -452,7 +462,8 @@ GlmidipluginEditor::~GlmidipluginEditor()
 
 void GlmidipluginEditor::initialise()
 {
-    toggleButton_PianoKeyRectObj->setToggleState(true, false);
+    togglePianoKeyObj->setToggleState(true, false);
+    toggleDrawControlMesh->setToggleState(true, false);
     zoomSlider .setValue (0.5);
     //textureBox.setSelectedItemIndex (0);
     //presetBox .setSelectedItemIndex (0);
@@ -461,13 +472,14 @@ void GlmidipluginEditor::initialise()
 
 void GlmidipluginEditor::updateToggleState (Button* button, String name)
 {
-
-    //auto stateOn = button->getToggleState();
-    if(button->getToggleState())
+    if(name == "Draw Control Mesh") glComponent->drawControlMesh = button->getToggleState();
+    else if(button->getToggleState())
     {
         if(name == "Pianokey_rectangle.obj") glComponent->drawPianoKeys = true;
         else if(name == "Teapot.obj") glComponent->drawPianoKeys = false;
     }
+    
+    
     
     //String stateString = state ? "ON" : "OFF";
     //Logger::outputDebugString (name + " Button changed to " + stateString);
@@ -518,12 +530,14 @@ void GlmidipluginEditor::resized()
     auto radioObjSelectorRegion = leftButtonToolbarArea.removeFromTop((BUTTON_HEIGHT * 2 + MARGIN*3));
     radioObjSelectorRegion.translate(0, MARGIN);
     radioButtonsObjSelector->setBounds (radioObjSelectorRegion);//MARGIN, keybHeight + MARGIN, 220, 140);
-    toggleButton_PianoKeyRectObj->setBounds(getSubdividedRegion(radioObjSelectorRegion, 1, 3, Vertical));//
-    toggleButton_TeapotObj->setBounds (getSubdividedRegion(radioObjSelectorRegion, 2, 3, Vertical));
+    togglePianoKeyObj->setBounds(getSubdividedRegion(radioObjSelectorRegion, 1, 3, Vertical));//
+    toggleTeapotObj->setBounds (getSubdividedRegion(radioObjSelectorRegion, 2, 3, Vertical));
     
     int sliderRegionHeight = leftButtonToolbarArea.getHeight() / 4 + BUTTON_HEIGHT;
     auto sliderRegion1 = leftButtonToolbarArea.removeFromTop(sliderRegionHeight);
     zoomSlider.setBounds(sliderRegion1.removeFromBottom(sliderRegion1.getHeight() - BUTTON_HEIGHT));
     zoomSlider.setTextBoxStyle (Slider::TextBoxBelow, false, BUTTON_WIDTH, 20);
+    
+    toggleDrawControlMesh->setBounds(leftButtonToolbarArea.removeFromTop(radioObjSelectorRegion.getHeight()));
     
 }

@@ -34,11 +34,21 @@ public:
     Slider zoomSlider;
     Slider rotationSlider;
 private:
-    // OBJ SELECTOR RADIO BOX
-    GroupComponent* radioButtonsObjSelector;
-    ToggleButton* toggleButton_PianoKeyRectObj;
-    ToggleButton* toggleButton_TeapotObj;
+    
+    
+    // RADIO BUTTONS:
     enum RadioButtonIds { ObjSelectorButtons = 1001 };
+    // RB->OBJ SELECTOR RADIO BOX
+    GroupComponent* radioButtonsObjSelector;
+    ToggleButton* togglePianoKeyObj;
+    ToggleButton* toggleTeapotObj;
+    
+    
+    // OBJ SELECTOR RADIO BOX
+    ToggleButton* toggleDrawControlMesh;
+    //ToggleButton* toggleButton_TeapotObj;
+    
+    
     
     // SLIDER LABELS
     Label zoomLabel  { {}, "Zoom:" };

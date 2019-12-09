@@ -52,7 +52,7 @@ struct Shape
             attributes.enable (openGLContext);
             
             glDrawArrays(GL_POINTS, vertexBuffer.indexBuffer, vertexBuffer.numIndices);
-            //glDrawElements (GL_TRIANGLES, vertexBuffer.numIndices, GL_UNSIGNED_INT, 0);
+            
             
             attributes.disable (openGLContext);
             
