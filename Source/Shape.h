@@ -35,8 +35,27 @@ struct Shape
             vertexBuffer.bind();
             
             attributes.enable (openGLContext);
+            
             glDrawElements (GL_TRIANGLES, vertexBuffer.numIndices, GL_UNSIGNED_INT, 0);
+            
             attributes.disable (openGLContext);
+        }
+    }
+    
+    void drawControlMesh(OpenGLContext& openGLContext, Attributes& attributes)
+    {
+        for (int i = 0; i < vertexBuffers.size(); ++i)
+        {
+            VertexBuffer& vertexBuffer = *vertexBuffers.getUnchecked (i);
+            vertexBuffer.bind();
+            
+            attributes.enable (openGLContext);
+            
+            glDrawArrays(GL_POINTS, vertexBuffer.indexBuffer, vertexBuffer.numIndices);
+            //glDrawElements (GL_TRIANGLES, vertexBuffer.numIndices, GL_UNSIGNED_INT, 0);
+            
+            attributes.disable (openGLContext);
+            
         }
     }
     

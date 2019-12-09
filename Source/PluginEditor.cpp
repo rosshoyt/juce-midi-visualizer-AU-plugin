@@ -69,7 +69,7 @@ private:
         jassert (OpenGLHelpers::isContextActive());
         
         const float desktopScale = (float) openGLContext.getRenderingScale();
-        OpenGLHelpers::clear (Colours::burlywood);
+        OpenGLHelpers::clear (Colours::cadetblue);
         
         updateShader();   // Check whether we need to compile a new shader
         
@@ -104,12 +104,20 @@ private:
         for(int i = 0; i < 128; i++)
         {
             // TODO could add automatic MidiChannel Sensing
-                if (uniforms->viewMatrix != nullptr)
+            if (uniforms->viewMatrix != nullptr)
                 uniforms->viewMatrix->setMatrix4 (getViewMatrix(i).mat, 1, false);
             
-            if(midiKeyboardState->isNoteOn(1, i)){
-                if(drawPianoKeys) shapePianoKey->draw (openGLContext, *attributes);
-                else              shapeTeapot  ->draw (openGLContext, *attributes);
+            if(drawPianoKeys)
+            {
+                shapePianoKey->drawControlMesh(openGLContext, *attributes);
+                if(midiKeyboardState->isNoteOn(1, i))
+                    shapePianoKey->draw (openGLContext, *attributes);
+            }
+            else
+            {
+                shapeTeapot->drawControlMesh(openGLContext, *attributes);
+                if(midiKeyboardState->isNoteOn(1, i))
+                    shapeTeapot->draw(openGLContext, *attributes);
             }
             
         }
@@ -269,21 +277,18 @@ private:
         const char* name;
         const char* vertexShader;
         const char* fragmentShader;
+        const char* geometryShader;
     };
     
     static Array<ShaderPreset> getPresets()
     {
-#define SHADER_DEMO_HEADER \
-"/*  This is a live OpenGL Shader demo.\n" \
-"    Edit the shader program below and it will be \n" \
-"    compiled and applied to the model above!\n" \
-"*/\n\n"
+
         
         ShaderPreset presets[] =
         {
             {
                 "Spiral Array Shader",
-                SHADER_DEMO_HEADER
+                
                 "attribute vec4 position;\n"
                 "attribute vec4 sourceColour;\n"
                 "attribute vec2 textureCoordIn;\n"
@@ -307,7 +312,7 @@ private:
                 "    gl_Position = projectionMatrix * viewMatrix * position;\n"
                 "}",
                 
-                SHADER_DEMO_HEADER
+                
 #if JUCE_OPENGL_ES
                 "varying lowp vec4 destinationColour;\n"
                 "varying lowp vec2 textureCoordOut;\n"
@@ -325,7 +330,7 @@ private:
                 "void main()\n"
                 "{\n"
                 "    gl_FragColor = vec4 (xPos, yPos, zPos, 1.0);\n"
-                "}"
+                "}",
 //                ,
 //                "Simple Light",
 //
@@ -429,14 +434,14 @@ GlmidipluginEditor::GlmidipluginEditor (GlmidipluginProcessor& p, MidiKeyboardSt
     zoomLabel.attachToComponent (&zoomSlider, false);
     addAndMakeVisible (zoomLabel);
     
-    // ROTATION SLIDER
-    //addAndMakeVisible(rotationSlider);
+    // SLIDER
+    
     
     
     
     initialise();
     
-    setResizable(true, true);
+    //setResizable(true, true);
     setSize (1000, 800);
 }
 
@@ -495,6 +500,7 @@ Rectangle<int> GlmidipluginEditor::getSubdividedRegion(Rectangle<int> region, in
 
 void GlmidipluginEditor::resized()
 {
+    // TODO Optimize Resizing (or skip resizeable
     Rectangle<int> r = getLocalBounds();
     float resizedKeybWidth = r.getWidth() - MARGIN * 2, resizedKeybHeight = r.getHeight() - 5;
     float keybWidth = resizedKeybWidth > MAX_KEYB_WIDTH ? MAX_KEYB_WIDTH : resizedKeybWidth;

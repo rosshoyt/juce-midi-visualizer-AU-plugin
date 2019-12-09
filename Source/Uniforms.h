@@ -11,7 +11,7 @@
 #pragma once
 
 //==============================================================================
-// This class just manages the uniform values that the shaders use.
+// Class that manages the uniform values that the shaders use.
 struct Uniforms
 {
     Uniforms (OpenGLContext& openGLContext, OpenGLShaderProgram& shader)
