@@ -252,15 +252,15 @@ struct OpenGLDemoClasses
     
 };
 
-class GLComponent : public Component, private OpenGLRenderer
+class GLComponent : public Component, private OpenGLRenderer, public Slider::Listener
 {
 public:
-    GLComponent(MidiKeyboardState &mKeybState) :
+    GLComponent(MidiKeyboardState &mKeybState, GlpluginAudioProcessorEditor *par) :
                         //allwaysDisplayKeysButton("Always Display Keys"),
                         rotation (0.0f), scale (0.5f), rotationSpeed (0.1f),
         textureToUse (nullptr), lastTexture (nullptr)
     {
-        
+        parent = par;
         
         midiKeyboardState = &mKeybState;
         Array<ShaderPreset> shaders = getPresets();
@@ -605,6 +605,15 @@ private:
         
         return Array<ShaderPreset> (presets, numElementsInArray (presets));
     }
+    
+    // INPUT HANDLING
+    
+    void sliderValueChanged (Slider*) override
+    {
+        scale = (float) parent->zoomSlider.getValue();
+        //demo.rotationSpeed = (float) speedSlider.getValue();
+    }
+    
     void mouseDown (const MouseEvent& e) override
     {
         draggableOrientation.mouseDown (e.getPosition());
@@ -616,10 +625,10 @@ private:
     }
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& d) override
     {
-        scale += d.deltaY;
+        parent->zoomSlider.setValue(parent->zoomSlider.getValue() + d.deltaY);
     }
     MidiKeyboardState * midiKeyboardState;
-    
+    GlpluginAudioProcessorEditor *parent;
 };
 
 
@@ -627,8 +636,11 @@ private:
 GlpluginAudioProcessorEditor::GlpluginAudioProcessorEditor (GlpluginAudioProcessor& p, MidiKeyboardState& midiKeyboardState)
 : AudioProcessorEditor (&p), processor (p), midiKeyboardComponent(midiKeyboardState, MidiKeyboardComponent::horizontalKeyboard)
 {
-    glComponent = new GLComponent(midiKeyboardState);
-    
+    addAndMakeVisible(midiKeyboardComponent);
+    // MAIN OPENGL DISPLAY
+    glComponent = new GLComponent(midiKeyboardState, this);
+    addAndMakeVisible (glComponent);
+    // OBJ SELECTOR RADIO BOX
     radioButtonsObjSelector = new GroupComponent ("OBJ Selector", "Use Obj File:");
     addAndMakeVisible (radioButtonsObjSelector);
     toggleButton_PianoKeyRectObj = new ToggleButton("Pianokey_rectangle.obj");
@@ -637,15 +649,25 @@ GlpluginAudioProcessorEditor::GlpluginAudioProcessorEditor (GlpluginAudioProcess
     toggleButton_TeapotObj      ->setRadioGroupId(ObjSelectorButtons);
     addAndMakeVisible(toggleButton_PianoKeyRectObj);
     addAndMakeVisible(toggleButton_TeapotObj);
-    
-    
     toggleButton_PianoKeyRectObj->onClick = [this] { updateToggleState (toggleButton_PianoKeyRectObj,   "Pianokey_rectangle.obj");   };
     toggleButton_TeapotObj      ->onClick = [this] { updateToggleState (toggleButton_TeapotObj, "Teapot.obj"); };
     
-    toggleButton_PianoKeyRectObj->setToggleState(true, false);
     
-    addAndMakeVisible (glComponent);
-    addAndMakeVisible(midiKeyboardComponent);
+    // ZOOM SLIDER
+    addAndMakeVisible (zoomSlider);
+    zoomSlider.setRange (0.0, 1.0, 0.001);
+    //zoomLabel.setText("Zoom:", NotificationType::dontSendNotification);
+    zoomSlider.addListener (glComponent);
+    zoomSlider.setSliderStyle(Slider::LinearVertical);
+    zoomLabel.attachToComponent (&zoomSlider, false);
+    addAndMakeVisible (zoomLabel);
+    
+    // ROTATION SLIDER
+    //addAndMakeVisible(rotationSlider);
+    
+    
+    
+    initialise();
     
 
     setSize (1000, 800);
@@ -655,6 +677,16 @@ GlpluginAudioProcessorEditor::~GlpluginAudioProcessorEditor()
 {
     glComponent = nullptr;
 }
+
+void GlpluginAudioProcessorEditor::initialise()
+{
+    toggleButton_PianoKeyRectObj->setToggleState(true, false);
+    zoomSlider .setValue (0.5);
+    //textureBox.setSelectedItemIndex (0);
+    //presetBox .setSelectedItemIndex (0);
+    
+}
+
 void GlpluginAudioProcessorEditor::updateToggleState (Button* button, String name)
 {
 
@@ -672,10 +704,24 @@ void GlpluginAudioProcessorEditor::updateToggleState (Button* button, String nam
 void GlpluginAudioProcessorEditor::paint (Graphics& g)
 {}
 
-Rectangle<int> GlpluginAudioProcessorEditor::getSubdividedRegion(Rectangle<int> region, int numer, int denom)
+Rectangle<int> GlpluginAudioProcessorEditor::getSubdividedRegion(Rectangle<int> region, int numer, int denom, SubdividedOrientation orientation)
 {
-    int newHeight = region.getHeight() / denom;
-    return Rectangle<int>(region.getX(), region.getY() + numer * newHeight, region.getWidth(), newHeight);
+    int x, y, height, width;
+    if(orientation == Vertical)
+    {
+        x = region.getX();
+        width = region.getWidth();
+        height = region.getHeight() / denom;
+        y = region.getY() + numer * height;
+    }
+    else
+    {
+        y = region.getY();
+        height = region.getHeight();
+        width = region.getWidth() / denom;
+        x = region.getX() + numer * width;
+    }
+    return Rectangle<int>(x, y, width, height);
 }
 
 void GlpluginAudioProcessorEditor::resized()
@@ -685,9 +731,7 @@ void GlpluginAudioProcessorEditor::resized()
     float keybWidth = resizedKeybWidth > MAX_KEYB_WIDTH ? MAX_KEYB_WIDTH : resizedKeybWidth;
     float keybHeight = resizedKeybHeight > MAX_KEYB_HEIGHT ? MAX_KEYB_HEIGHT : resizedKeybHeight;
     midiKeyboardComponent.setBounds (MARGIN, MARGIN, keybWidth, keybHeight );
-    //midiKeyboardComponent.setBounds(r.removeFromTop())
-    //btn.setBounds (r.removeFromTop (r.getHeight() >> 1));
-    //glComponent->setBounds (0, r.getY() - keybHeight, r.getWidth(), r.getHeight());
+    
     auto areaBelowKeyboard = r.removeFromBottom(r.getHeight() - (keybHeight + MARGIN));
     
     int leftToolbarWidth = r.getWidth() / 7;
@@ -699,10 +743,12 @@ void GlpluginAudioProcessorEditor::resized()
     auto radioObjSelectorRegion = leftButtonToolbarArea.removeFromTop((BUTTON_HEIGHT * 2 + MARGIN*3));
     radioObjSelectorRegion.translate(0, MARGIN);
     radioButtonsObjSelector->setBounds (radioObjSelectorRegion);//MARGIN, keybHeight + MARGIN, 220, 140);
-    toggleButton_PianoKeyRectObj->setBounds(getSubdividedRegion(radioObjSelectorRegion, 1, 3));//
-    toggleButton_TeapotObj->setBounds (getSubdividedRegion(radioObjSelectorRegion, 2, 3));
-    //auto toggleButtonArea = radioObjSelectorRegion.withTrimmedBottom(radioObjSelectorRegion.getHeight() /2);
-    //toggleButton_PianoKeyRectObj->setBounds(toggleButtonArea.removeFromTop(MARGIN));//radioObjSelectorRegion.removeFromTop(MARGIN));
-    //toggleButtonArea.setTop(toggleButtonArea.getY() + BUTTON_HEIGHT);
-    //toggleButton_TeapotObj->setBounds (toggleButtonArea);//radioObjSelectorRegion.withTrimmedTop(BUTTON_HEIGHT + 2 * MARGIN));
+    toggleButton_PianoKeyRectObj->setBounds(getSubdividedRegion(radioObjSelectorRegion, 1, 3, Vertical));//
+    toggleButton_TeapotObj->setBounds (getSubdividedRegion(radioObjSelectorRegion, 2, 3, Vertical));
+    
+    int sliderRegionHeight = leftButtonToolbarArea.getHeight() / 4 + BUTTON_HEIGHT;
+    auto sliderRegion1 = leftButtonToolbarArea.removeFromTop(sliderRegionHeight);
+    zoomSlider.setBounds(sliderRegion1.removeFromBottom(sliderRegion1.getHeight() - BUTTON_HEIGHT));
+    zoomSlider.setTextBoxStyle (Slider::TextBoxBelow, false, BUTTON_WIDTH, 20);
+    
 }

@@ -29,20 +29,26 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
-
+    
+    // SLIDERS FOR GL WINDOW PARAMS THAT NEED TO BE ACCESSED BY CHILDREN
+    Slider zoomSlider;
+    Slider rotationSlider;
 private:
-    //ToggleButton alwaysDisplayKeysButton;
+    // OBJ SELECTOR RADIO BOX
     GroupComponent* radioButtonsObjSelector;
     ToggleButton* toggleButton_PianoKeyRectObj;
     ToggleButton* toggleButton_TeapotObj;
+    enum RadioButtonIds { ObjSelectorButtons = 1001 };
+    
+    // SLIDER LABELS
+    Label zoomLabel  { {}, "Zoom:" };
+    Label rotationLabel { {}, "Rotation:" };
     
     
-    enum RadioButtonIds
-    {
-        ObjSelectorButtons = 1001
-    };
+    void initialise();
     
     void updateToggleState(Button*, String);
+    
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     GlpluginAudioProcessor& processor;
@@ -58,7 +64,9 @@ private:
     MAX_KEYB_WIDTH = 1200, MAX_KEYB_HEIGHT = 82, BUTTON_WIDTH = 50, BUTTON_HEIGHT = 30;
     
     // Display Helper Method
-    static Rectangle<int> getSubdividedRegion(const Rectangle<int>, int, int);
+    enum SubdividedOrientation { Vertical, Horizontal};
+    static Rectangle<int> getSubdividedRegion(const Rectangle<int>, int, int, SubdividedOrientation);
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlpluginAudioProcessorEditor)
 };
 
