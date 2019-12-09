@@ -15,7 +15,7 @@
 #include "Textures.h"
 #include "Uniforms.h"
 #include "Attributes.h"
-
+#include "ShaderPresetManager.h"
 
 //==============================================================================
 
@@ -59,13 +59,13 @@ public:
     bool drawControlMesh = true;
     
     
-    
+    String newVertexShader, newFragmentShader;
 private:
-    
     
     void newOpenGLContextCreated() override
     {
         freeAllContextObjects();
+        
     }
     
     void renderOpenGL() override
@@ -173,7 +173,7 @@ private:
     OpenGLTexture texture;
     DemoTexture* textureToUse, *lastTexture;
     
-    String newVertexShader, newFragmentShader;
+    //String newVertexShader, newFragmentShader;
     
     OpenGLContext openGLContext;
     
@@ -241,6 +241,8 @@ private:
     }
     
     //==============================================================================
+
+    
     void updateShader()
     {
         if (newVertexShader.isNotEmpty() || newFragmentShader.isNotEmpty())
@@ -338,46 +340,361 @@ private:
                 "//  gl_FragColor = vec4 (xPos, yPos, zPos, 1.0);\n"
                 "    gl_FragColor = vec4 (xPos, yPos, zPos, 1.0);\n"
                 "}",
-//                ,
-//                "Simple Light",
-//
-//                SHADER_DEMO_HEADER
-//                "attribute vec4 position;\n"
-//                "attribute vec4 normal;\n"
-//                "\n"
-//                "uniform mat4 projectionMatrix;\n"
-//                "uniform mat4 viewMatrix;\n"
-//                "uniform vec4 lightPosition;\n"
-//                "\n"
-//                "varying float lightIntensity;\n"
-//                "\n"
-//                "void main()\n"
-//                "{\n"
-//                "    vec4 light = viewMatrix * lightPosition;\n"
-//                "    lightIntensity = dot (light, normal);\n"
-//                "\n"
-//                "    gl_Position = projectionMatrix * viewMatrix * position;\n"
-//                "}\n",
-//
-//                SHADER_DEMO_HEADER
-//#if JUCE_OPENGL_ES
-//                "varying highp float lightIntensity;\n"
-//#else
-//                "varying float lightIntensity;\n"
-//#endif
-//                "\n"
-//                "void main()\n"
-//                "{\n"
-//#if JUCE_OPENGL_ES
-//                "   highp float l = lightIntensity * 0.25;\n"
-//                "   highp vec4 colour = vec4 (l, l, l, 1.0);\n"
-//#else
-//                "   float l = lightIntensity * 0.25;\n"
-//                "   vec4 colour = vec4 (l, l, l, 1.0);\n"
-//#endif
-//                "\n"
-//                "    gl_FragColor = colour;\n"
-//                "}\n"
+            },
+            {
+                "Texture + Lighting",
+                
+                SHADER_DEMO_HEADER
+                "attribute vec4 position;\n"
+                "attribute vec4 normal;\n"
+                "attribute vec4 sourceColour;\n"
+                "attribute vec2 textureCoordIn;\n"
+                "\n"
+                "uniform mat4 projectionMatrix;\n"
+                "uniform mat4 viewMatrix;\n"
+                "uniform vec4 lightPosition;\n"
+                "\n"
+                "varying vec4 destinationColour;\n"
+                "varying vec2 textureCoordOut;\n"
+                "varying float lightIntensity;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    destinationColour = sourceColour;\n"
+                "    textureCoordOut = textureCoordIn;\n"
+                "\n"
+                "    vec4 light = viewMatrix * lightPosition;\n"
+                "    lightIntensity = dot (light, normal);\n"
+                "    gl_Position = projectionMatrix * viewMatrix * position;\n"
+                "}\n",
+                
+                SHADER_DEMO_HEADER
+#if JUCE_OPENGL_ES
+                "varying lowp vec4 destinationColour;\n"
+                "varying lowp vec2 textureCoordOut;\n"
+                "varying highp float lightIntensity;\n"
+#else
+                "varying vec4 destinationColour;\n"
+                "varying vec2 textureCoordOut;\n"
+                "varying float lightIntensity;\n"
+#endif
+                "\n"
+                "uniform sampler2D demoTexture;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+#if JUCE_OPENGL_ES
+                "   highp float l = max (0.3, lightIntensity * 0.3);\n"
+                "   highp vec4 colour = vec4 (l, l, l, 1.0);\n"
+#else
+                "   float l = max (0.3, lightIntensity * 0.3);\n"
+                "   vec4 colour = vec4 (l, l, l, 1.0);\n"
+#endif
+                "    gl_FragColor = colour * texture2D (demoTexture, textureCoordOut);\n"
+                "}\n"
+            },
+            
+            {
+                "Textured",
+                
+                SHADER_DEMO_HEADER
+                "attribute vec4 position;\n"
+                "attribute vec4 sourceColour;\n"
+                "attribute vec2 textureCoordIn;\n"
+                "\n"
+                "uniform mat4 projectionMatrix;\n"
+                "uniform mat4 viewMatrix;\n"
+                "\n"
+                "varying vec4 destinationColour;\n"
+                "varying vec2 textureCoordOut;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    destinationColour = sourceColour;\n"
+                "    textureCoordOut = textureCoordIn;\n"
+                "    gl_Position = projectionMatrix * viewMatrix * position;\n"
+                "}\n",
+                
+                SHADER_DEMO_HEADER
+#if JUCE_OPENGL_ES
+                "varying lowp vec4 destinationColour;\n"
+                "varying lowp vec2 textureCoordOut;\n"
+#else
+                "varying vec4 destinationColour;\n"
+                "varying vec2 textureCoordOut;\n"
+#endif
+                "\n"
+                "uniform sampler2D demoTexture;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    gl_FragColor = texture2D (demoTexture, textureCoordOut);\n"
+                "}\n"
+            },
+            
+            {
+                "Flat Colour",
+                
+                SHADER_DEMO_HEADER
+                "attribute vec4 position;\n"
+                "attribute vec4 sourceColour;\n"
+                "attribute vec2 textureCoordIn;\n"
+                "\n"
+                "uniform mat4 projectionMatrix;\n"
+                "uniform mat4 viewMatrix;\n"
+                "\n"
+                "varying vec4 destinationColour;\n"
+                "varying vec2 textureCoordOut;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    destinationColour = sourceColour;\n"
+                "    textureCoordOut = textureCoordIn;\n"
+                "    gl_Position = projectionMatrix * viewMatrix * position;\n"
+                "}\n",
+                
+                SHADER_DEMO_HEADER
+#if JUCE_OPENGL_ES
+                "varying lowp vec4 destinationColour;\n"
+                "varying lowp vec2 textureCoordOut;\n"
+#else
+                "varying vec4 destinationColour;\n"
+                "varying vec2 textureCoordOut;\n"
+#endif
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    gl_FragColor = destinationColour;\n"
+                "}\n"
+            },
+            
+            {
+                "Rainbow",
+                
+                SHADER_DEMO_HEADER
+                "attribute vec4 position;\n"
+                "attribute vec4 sourceColour;\n"
+                "attribute vec2 textureCoordIn;\n"
+                "\n"
+                "uniform mat4 projectionMatrix;\n"
+                "uniform mat4 viewMatrix;\n"
+                "\n"
+                "varying vec4 destinationColour;\n"
+                "varying vec2 textureCoordOut;\n"
+                "\n"
+                "varying float xPos;\n"
+                "varying float yPos;\n"
+                "varying float zPos;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    vec4 v = vec4 (position);\n"
+                "    xPos = clamp (v.x, 0.0, 1.0);\n"
+                "    yPos = clamp (v.y, 0.0, 1.0);\n"
+                "    zPos = clamp (v.z, 0.0, 1.0);\n"
+                "    gl_Position = projectionMatrix * viewMatrix * position;\n"
+                "}",
+                
+                SHADER_DEMO_HEADER
+#if JUCE_OPENGL_ES
+                "varying lowp vec4 destinationColour;\n"
+                "varying lowp vec2 textureCoordOut;\n"
+                "varying lowp float xPos;\n"
+                "varying lowp float yPos;\n"
+                "varying lowp float zPos;\n"
+#else
+                "varying vec4 destinationColour;\n"
+                "varying vec2 textureCoordOut;\n"
+                "varying float xPos;\n"
+                "varying float yPos;\n"
+                "varying float zPos;\n"
+#endif
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    gl_FragColor = vec4 (xPos, yPos, zPos, 1.0);\n"
+                "}"
+            },
+            
+            {
+                "Changing Colour",
+                
+                SHADER_DEMO_HEADER
+                "attribute vec4 position;\n"
+                "attribute vec2 textureCoordIn;\n"
+                "\n"
+                "uniform mat4 projectionMatrix;\n"
+                "uniform mat4 viewMatrix;\n"
+                "\n"
+                "varying vec2 textureCoordOut;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    textureCoordOut = textureCoordIn;\n"
+                "    gl_Position = projectionMatrix * viewMatrix * position;\n"
+                "    //(projectionMatrix + mat4(gl_InstanceID, 1, 1, 1))\n"
+                "    int id = gl_InstanceID;\n"
+                "}\n",
+                
+                SHADER_DEMO_HEADER
+                "#define PI 3.1415926535897932384626433832795\n"
+                "\n"
+#if JUCE_OPENGL_ES
+                "precision mediump float;\n"
+                "varying lowp vec2 textureCoordOut;\n"
+#else
+                "varying vec2 textureCoordOut;\n"
+#endif
+                "uniform float bouncingNumber;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "   float b = bouncingNumber;\n"
+                "   float n = b * PI * 2.0;\n"
+                "   float sn = (sin (n * textureCoordOut.x) * 0.5) + 0.5;\n"
+                "   float cn = (sin (n * textureCoordOut.y) * 0.5) + 0.5;\n"
+                "\n"
+                "   vec4 col = vec4 (b, sn, cn, 1.0);\n"
+                "   gl_FragColor = col;\n"
+                "}\n"
+            },
+            
+            {
+                "Simple Light",
+                
+                SHADER_DEMO_HEADER
+                "attribute vec4 position;\n"
+                "attribute vec4 normal;\n"
+                "\n"
+                "uniform mat4 projectionMatrix;\n"
+                "uniform mat4 viewMatrix;\n"
+                "uniform vec4 lightPosition;\n"
+                "\n"
+                "varying float lightIntensity;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    vec4 light = viewMatrix * lightPosition;\n"
+                "    lightIntensity = dot (light, normal);\n"
+                "\n"
+                "    gl_Position = projectionMatrix * viewMatrix * position;\n"
+                "}\n",
+                
+                SHADER_DEMO_HEADER
+#if JUCE_OPENGL_ES
+                "varying highp float lightIntensity;\n"
+#else
+                "varying float lightIntensity;\n"
+#endif
+                "\n"
+                "void main()\n"
+                "{\n"
+#if JUCE_OPENGL_ES
+                "   highp float l = lightIntensity * 0.25;\n"
+                "   highp vec4 colour = vec4 (l, l, l, 1.0);\n"
+#else
+                "   float l = lightIntensity * 0.25;\n"
+                "   vec4 colour = vec4 (l, l, l, 1.0);\n"
+#endif
+                "\n"
+                "    gl_FragColor = colour;\n"
+                "}\n"
+            },
+            
+            {
+                "Flattened",
+                
+                SHADER_DEMO_HEADER
+                "attribute vec4 position;\n"
+                "attribute vec4 normal;\n"
+                "\n"
+                "uniform mat4 projectionMatrix;\n"
+                "uniform mat4 viewMatrix;\n"
+                "uniform vec4 lightPosition;\n"
+                "\n"
+                "varying float lightIntensity;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    vec4 light = viewMatrix * lightPosition;\n"
+                "    lightIntensity = dot (light, normal);\n"
+                "\n"
+                "    vec4 v = vec4 (position);\n"
+                "    v.z = v.z * 0.1;\n"
+                "\n"
+                "    gl_Position = projectionMatrix * viewMatrix * v;\n"
+                "}\n",
+                
+                SHADER_DEMO_HEADER
+#if JUCE_OPENGL_ES
+                "varying highp float lightIntensity;\n"
+#else
+                "varying float lightIntensity;\n"
+#endif
+                "\n"
+                "void main()\n"
+                "{\n"
+#if JUCE_OPENGL_ES
+                "   highp float l = lightIntensity * 0.25;\n"
+                "   highp vec4 colour = vec4 (l, l, l, 1.0);\n"
+#else
+                "   float l = lightIntensity * 0.25;\n"
+                "   vec4 colour = vec4 (l, l, l, 1.0);\n"
+#endif
+                "\n"
+                "    gl_FragColor = colour;\n"
+                "}\n"
+            },
+            
+            {
+                "Toon Shader",
+                
+                SHADER_DEMO_HEADER
+                "attribute vec4 position;\n"
+                "attribute vec4 normal;\n"
+                "\n"
+                "uniform mat4 projectionMatrix;\n"
+                "uniform mat4 viewMatrix;\n"
+                "uniform vec4 lightPosition;\n"
+                "\n"
+                "varying float lightIntensity;\n"
+                "\n"
+                "void main()\n"
+                "{\n"
+                "    vec4 light = viewMatrix * lightPosition;\n"
+                "    lightIntensity = dot (light, normal);\n"
+                "\n"
+                "    gl_Position = projectionMatrix * viewMatrix * position;\n"
+                "}\n",
+                
+                SHADER_DEMO_HEADER
+#if JUCE_OPENGL_ES
+                "varying highp float lightIntensity;\n"
+#else
+                "varying float lightIntensity;\n"
+#endif
+                "\n"
+                "void main()\n"
+                "{\n"
+#if JUCE_OPENGL_ES
+                "    highp float intensity = lightIntensity * 0.5;\n"
+                "    highp vec4 colour;\n"
+#else
+                "    float intensity = lightIntensity * 0.5;\n"
+                "    vec4 colour;\n"
+#endif
+                "\n"
+                "    if (intensity > 0.95)\n"
+                "        colour = vec4 (1.0, 0.5, 0.5, 1.0);\n"
+                "    else if (intensity > 0.5)\n"
+                "        colour  = vec4 (0.6, 0.3, 0.3, 1.0);\n"
+                "    else if (intensity > 0.25)\n"
+                "        colour  = vec4 (0.4, 0.2, 0.2, 1.0);\n"
+                "    else\n"
+                "        colour  = vec4 (0.2, 0.1, 0.1, 1.0);\n"
+                "\n"
+                "    gl_FragColor = colour;\n"
+                "}\n"
             }
         };
         
@@ -441,11 +758,23 @@ GlmidipluginEditor::GlmidipluginEditor (GlmidipluginProcessor& p, MidiKeyboardSt
     zoomLabel.attachToComponent (&zoomSlider, false);
     addAndMakeVisible (zoomLabel);
     
-    // LEFT RADIO BOX: Draw Control Mesh
-    toggleDrawControlMesh = new ToggleButton("Draw Control Mesh");
-    toggleDrawControlMesh->onClick = [this] { updateToggleState (toggleDrawControlMesh, "Draw Control Mesh");   };
+    // LEFT RADIO BOX: Draw Points
+    toggleDrawControlMesh = new ToggleButton("Draw Points");
+    toggleDrawControlMesh->onClick = [this] { updateToggleState (toggleDrawControlMesh, "Draw Points");   };
     addAndMakeVisible(toggleDrawControlMesh);
     
+    
+    addAndMakeVisible (shaderPresetBox);
+    shaderPresetBox.onChange = [this] { selectShaderPreset (shaderPresetBox.getSelectedItemIndex()); };
+    
+    auto presets = ShaderPresetManager::getPresets();
+    
+    for (int i = 0; i < presets.size(); ++i)
+        shaderPresetBox.addItem (presets[i].name, i + 1);
+    
+    addAndMakeVisible (shaderPresetBoxLabel);
+    shaderPresetBoxLabel.attachToComponent (&shaderPresetBox, true);
+
     
     
     
@@ -472,18 +801,32 @@ void GlmidipluginEditor::initialise()
 
 void GlmidipluginEditor::updateToggleState (Button* button, String name)
 {
-    if(name == "Draw Control Mesh") glComponent->drawControlMesh = button->getToggleState();
+    if(name == "Draw Points") glComponent->drawControlMesh = button->getToggleState();
     else if(button->getToggleState())
     {
         if(name == "Pianokey_rectangle.obj") glComponent->drawPianoKeys = true;
         else if(name == "Teapot.obj") glComponent->drawPianoKeys = false;
     }
-    
-    
-    
-    //String stateString = state ? "ON" : "OFF";
-    //Logger::outputDebugString (name + " Button changed to " + stateString);
 }
+
+void GlmidipluginEditor::selectShaderPreset (int preset)
+{
+    const auto& p = ShaderPresetManager::getPresets()[preset];
+    setShaderProgram(p.vertexShader, p.fragmentShader);
+    //vertexDocument  .replaceAllContent (p.vertexShader);
+    //fragmentDocument.replaceAllContent (p.fragmentShader);
+    
+    //startTimer (1);
+}
+
+void  GlmidipluginEditor::setShaderProgram (const String& vertexShader, const String& fragmentShader)
+{
+    DBG("In SetShaderProgram");
+    glComponent->newVertexShader = vertexShader;
+    glComponent->newFragmentShader = fragmentShader;
+}
+//==============================================================================
+
 //==============================================================================
 void GlmidipluginEditor::paint (Graphics& g)
 {
@@ -539,5 +882,7 @@ void GlmidipluginEditor::resized()
     zoomSlider.setTextBoxStyle (Slider::TextBoxBelow, false, BUTTON_WIDTH, 20);
     
     toggleDrawControlMesh->setBounds(leftButtonToolbarArea.removeFromTop(radioObjSelectorRegion.getHeight()));
+    
+    shaderPresetBox.setBounds(leftButtonToolbarArea.removeFromTop(BUTTON_HEIGHT * 3));
     
 }

@@ -13,6 +13,8 @@
   <MAINGROUP id="snosp0" name="GLPlugin">
     <GROUP id="{10B53D3B-D2A8-6E5A-3C25-C4A55D52FBBF}" name="Source">
       <GROUP id="{9A566155-ECF4-D247-29CC-8130EE9E483D}" name="OpenGL">
+        <FILE id="jBYs9z" name="ShaderPresetManager.h" compile="0" resource="0"
+              file="Source/ShaderPresetManager.h"/>
         <FILE id="H8TL8U" name="Attributes.h" compile="0" resource="0" file="Source/Attributes.h"/>
         <FILE id="m9jtiJ" name="Shape.h" compile="0" resource="0" file="Source/Shape.h"/>
         <FILE id="Yb8Czq" name="GLUtils.h" compile="0" resource="0" file="Source/GLUtils.h"/>

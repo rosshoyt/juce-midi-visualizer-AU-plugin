@@ -33,6 +33,10 @@ public:
     // SLIDERS FOR GL WINDOW PARAMS THAT NEED TO BE ACCESSED BY CHILDREN
     Slider zoomSlider;
     Slider rotationSlider;
+    
+    // SHADER SELECTOR
+    ComboBox shaderPresetBox;
+    
 private:
     
     
@@ -50,17 +54,21 @@ private:
     
     
     
-    // SLIDER LABELS
+    // LABELS
     Label zoomLabel  { {}, "Zoom:" };
-    Label rotationLabel { {}, "Rotation:" };
+    Label shaderPresetBoxLabel;
+    //Label rotationLabel { {}, "Rotation:" };
     
     
     void initialise();
     
     void updateToggleState(Button*, String);
     
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
+    void selectShaderPreset(int);
+    void setShaderProgram(const String&, const String&);
+    void updateShader();
+    
+    // class that created this class
     GlmidipluginProcessor& processor;
     
 
