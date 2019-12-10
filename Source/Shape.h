@@ -43,7 +43,7 @@ struct Shape
     
     void drawControlMesh(OpenGLContext& openGLContext, Attributes& attributes)
     {
-        glLineWidth(3);
+        glLineWidth(1);
         
         for (int i = 0; i < vertexBuffers.size(); ++i)
         {
@@ -52,9 +52,7 @@ struct Shape
             
             attributes.enable (openGLContext);
             
-            //glDrawArrays(GL_POINTS, vertexBuffer.indexBuffer, vertexBuffer.numIndices); // draws points
-            glDrawElements(GL_LINE_LOOP, vertexBuffer.numIndices, GL_UNSIGNED_INT, &vertexBuffer.indexBuffer);
-            //glDrawElements(<#GLenum mode#>, <#GLsizei count#>, <#GLenum type#>, <#const GLvoid *indices#>)
+            glDrawArrays(GL_LINE_LOOP, vertexBuffer.indexBuffer, vertexBuffer.numIndices);
             
             attributes.disable (openGLContext);
             
