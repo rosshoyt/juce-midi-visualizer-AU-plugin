@@ -1,15 +1,16 @@
 /*
   ==============================================================================
+Ross Hoyt
+PluginEditor.h
+The Plugin Window, and the GL Component are declared here.
+They are defined PluginEditor.h
 
-    This file was auto-generated!
-
-    It contains the basic framework code for a JUCE plugin editor.
-
-  ==============================================================================
+==============================================================================
 */
 
 #ifndef PLUGINEDITOR_H_INCLUDED
 #define PLUGINEDITOR_H_INCLUDED
+
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
@@ -18,13 +19,12 @@
 //==============================================================================
 /**
 */
-class GLComponent;
-
-class GlmidipluginEditor  : public AudioProcessorEditor
+class GLComponent; // forward declared
+class PluginEditor  : public AudioProcessorEditor
 {
 public:
-    GlmidipluginEditor (GlmidipluginProcessor&, MidiKeyboardState&);
-    ~GlmidipluginEditor();
+    PluginEditor (PluginProcessor&, MidiKeyboardState&);
+    ~PluginEditor();
 
     //==============================================================================
     void paint (Graphics&) override;
@@ -52,8 +52,7 @@ private:
     ToggleButton* toggleDrawControlMesh;
     //ToggleButton* toggleButton_TeapotObj;
     
-    
-    
+
     // LABELS
     Label zoomLabel  { {}, "Zoom:" };
     Label shaderPresetBoxLabel;
@@ -69,7 +68,7 @@ private:
     void updateShader();
     
     // class that created this class
-    GlmidipluginProcessor& processor;
+    PluginProcessor& processor;
     
 
     MidiKeyboardComponent midiKeyboardComponent;
@@ -86,7 +85,7 @@ private:
     enum SubdividedOrientation { Vertical, Horizontal};
     static Rectangle<int> getSubdividedRegion(const Rectangle<int>, int, int, SubdividedOrientation);
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlmidipluginEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginEditor)
 };
 
 

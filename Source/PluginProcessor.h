@@ -1,15 +1,17 @@
 /*
   ==============================================================================
 
-    This file was auto-generated!
+    Ross Hoyt
+    PluginProcessor.h
 
-    It contains the basic framework code for a JUCE plugin processor.
+    Contains framework code for a JUCE plugin processor.
 
   ==============================================================================
 */
 
-#ifndef PLUGINPROCESSOR_H_INCLUDED
-#define PLUGINPROCESSOR_H_INCLUDED
+//#ifndef PLUGINPROCESSOR_H_INCLUDED
+//#define PLUGINPROCESSOR_H_INCLUDED
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
@@ -17,12 +19,12 @@
 //==============================================================================
 /**
 */
-class GlmidipluginProcessor  : public AudioProcessor
+class PluginProcessor  : public AudioProcessor
 {
 public:
     //==============================================================================
-    GlmidipluginProcessor();
-    ~GlmidipluginProcessor();
+    PluginProcessor();
+    ~PluginProcessor();
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -60,8 +62,8 @@ private:
     //==============================================================================
     MidiKeyboardState midiKeyboardState;
     int midiSampleCounter;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlmidipluginProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginProcessor)
 };
 
 
-#endif  // PLUGINPROCESSOR_H_INCLUDED
+//#endif  // PLUGINPROCESSOR_H_INCLUDED

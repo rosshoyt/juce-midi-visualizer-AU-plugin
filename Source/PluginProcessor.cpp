@@ -1,9 +1,9 @@
 /*
   ==============================================================================
 
-    This file was auto-generated!
 
-    It contains the basic framework code for a JUCE plugin processor.
+    Ross Hoyt
+    PluginProcessor.cpp
 
   ==============================================================================
 */
@@ -13,7 +13,7 @@
 
 
 //==============================================================================
-GlmidipluginProcessor::GlmidipluginProcessor()
+PluginProcessor::PluginProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -27,17 +27,17 @@ GlmidipluginProcessor::GlmidipluginProcessor()
 {
 }
 
-GlmidipluginProcessor::~GlmidipluginProcessor()
+PluginProcessor::~PluginProcessor()
 {
 }
 
 //==============================================================================
-const String GlmidipluginProcessor::getName() const
+const String PluginProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool GlmidipluginProcessor::acceptsMidi() const
+bool PluginProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -46,7 +46,7 @@ bool GlmidipluginProcessor::acceptsMidi() const
    #endif
 }
 
-bool GlmidipluginProcessor::producesMidi() const
+bool PluginProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -55,50 +55,50 @@ bool GlmidipluginProcessor::producesMidi() const
    #endif
 }
 
-double GlmidipluginProcessor::getTailLengthSeconds() const
+double PluginProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int GlmidipluginProcessor::getNumPrograms()
+int PluginProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int GlmidipluginProcessor::getCurrentProgram()
+int PluginProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void GlmidipluginProcessor::setCurrentProgram (int index)
+void PluginProcessor::setCurrentProgram (int index)
 {
 }
 
-const String GlmidipluginProcessor::getProgramName (int index)
+const String PluginProcessor::getProgramName (int index)
 {
     return String();
 }
 
-void GlmidipluginProcessor::changeProgramName (int index, const String& newName)
+void PluginProcessor::changeProgramName (int index, const String& newName)
 {
 }
 
 //==============================================================================
-void GlmidipluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void PluginProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 }
 
-void GlmidipluginProcessor::releaseResources()
+void PluginProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool GlmidipluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool PluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
     ignoreUnused (layouts);
@@ -121,14 +121,17 @@ bool GlmidipluginProcessor::isBusesLayoutSupported (const BusesLayout& layouts) 
 }
 #endif
 
-void GlmidipluginProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+void PluginProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
     const int totalNumInputChannels  = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
     
+    // MIDI Processing Occurs here
     int numMidiEvents = midiMessages.getNumEvents();
     midiKeyboardState.processNextMidiBuffer(midiMessages, midiSampleCounter, numMidiEvents, true);
     midiSampleCounter += numMidiEvents;
+    
+    // AUDIO BUFFER HANDLING (DEFAULT - DOES NOTHING BUT MUTE ANY INPUT DATA
     // In case we have more outputs than inputs, this code clears any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
@@ -140,34 +143,33 @@ void GlmidipluginProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&
 
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        float* channelData = buffer.getWritePointer (channel);
-
+    //for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    //{
+        //float* channelData = buffer.getWritePointer (channel);
         // ..do something to the data...
-    }
+    //}
 }
 
 //==============================================================================
-bool GlmidipluginProcessor::hasEditor() const
+bool PluginProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-AudioProcessorEditor* GlmidipluginProcessor::createEditor()
+AudioProcessorEditor* PluginProcessor::createEditor()
 {
-    return new GlmidipluginEditor (*this, midiKeyboardState);
+    return new PluginEditor (*this, midiKeyboardState);
 }
 
 //==============================================================================
-void GlmidipluginProcessor::getStateInformation (MemoryBlock& destData)
+void PluginProcessor::getStateInformation (MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void GlmidipluginProcessor::setStateInformation (const void* data, int sizeInBytes)
+void PluginProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
@@ -177,5 +179,5 @@ void GlmidipluginProcessor::setStateInformation (const void* data, int sizeInByt
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new GlmidipluginProcessor();
+    return new PluginProcessor();
 }

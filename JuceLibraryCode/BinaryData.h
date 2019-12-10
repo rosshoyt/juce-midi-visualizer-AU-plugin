@@ -11,17 +11,14 @@ namespace BinaryData
     extern const char*   portmeirion_jpg;
     const int            portmeirion_jpgSize = 145904;
 
-    extern const char*   teapot_obj;
-    const int            teapot_objSize = 95000;
-
-    extern const char*   cylinder_obj;
-    const int            cylinder_objSize = 1152;
-
     extern const char*   pianokey_rectangle_obj;
-    const int            pianokey_rectangle_objSize = 420;
+    const int            pianokey_rectangle_objSize = 442;
+
+    extern const char*   teapot_obj;
+    const int            teapot_objSize = 95004;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 4;
+    const int namedResourceListSize = 3;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

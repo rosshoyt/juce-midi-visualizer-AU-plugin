@@ -1,10 +1,9 @@
 /*
  ==============================================================================
  
+ Ross Hoyt
  Attributes.h
- Created: 8 Dec 2019 11:53:46pm
- Author:  Ross Hoyt
- 
+ This class manages the attributes that the shaders use
  ==============================================================================
  */
 
@@ -12,7 +11,6 @@
 #include "Vertex.h"
 
 //==============================================================================
-// This class just manages the attributes that the demo shaders use.
 struct Attributes
 {
     Attributes (OpenGLContext& openGLContext, OpenGLShaderProgram& shader)
