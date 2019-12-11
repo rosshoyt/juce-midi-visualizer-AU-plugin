@@ -7,8 +7,380 @@
 namespace BinaryData
 {
 
-//================== portmeirion.jpg ==================
+//================== ChangingColor.shader ==================
 static const unsigned char temp_binary_data_0[] =
+"#shader preset display name Changing Color\n"
+"#shader vertex\n"
+"\n"
+"attribute vec4 position;\n"
+"attribute vec2 textureCoordIn;\n"
+"\n"
+"uniform mat4 projectionMatrix;\n"
+"uniform mat4 viewMatrix;\n"
+"\n"
+"varying vec2 textureCoordOut;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    textureCoordOut = textureCoordIn;\n"
+"    gl_Position = projectionMatrix * viewMatrix * position;\n"
+"    //(projectionMatrix + mat4(gl_InstanceID, 1, 1, 1))\n"
+"    int id = gl_InstanceID;\n"
+"}\n"
+"\n"
+"#shader fragment\n"
+"\n"
+"#define PI 3.1415926535897932384626433832795\n"
+"\n"
+"varying vec2 textureCoordOut;\n"
+"\n"
+"uniform float bouncingNumber;\n"
+"\n"
+"void main()\n"
+"{\n"
+"   float b = bouncingNumber;\n"
+"   float n = b * PI * 2.0;\n"
+"   float sn = (sin (n * textureCoordOut.x) * 0.5) + 0.5;\n"
+"   float cn = (sin (n * textureCoordOut.y) * 0.5) + 0.5;\n"
+"\n"
+"   vec4 col = vec4 (b, sn, cn, 1.0);\n"
+"   gl_FragColor = col;\n"
+"}\n";
+
+const char* ChangingColor_shader = (const char*) temp_binary_data_0;
+
+//================== FlatColor.shader ==================
+static const unsigned char temp_binary_data_1[] =
+"#shader preset display name Flat Color\n"
+"#shader vertex\n"
+"\n"
+"attribute vec4 position;\n"
+"attribute vec4 sourceColour;\n"
+"attribute vec2 textureCoordIn;\n"
+"\n"
+"uniform mat4 projectionMatrix;\n"
+"uniform mat4 viewMatrix;\n"
+"\n"
+"varying vec4 destinationColour;\n"
+"varying vec2 textureCoordOut;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    destinationColour = sourceColour;\n"
+"    textureCoordOut = textureCoordIn;\n"
+"    gl_Position = projectionMatrix * viewMatrix * position;\n"
+"}\n"
+"\n"
+"#shader fragment\n"
+"\n"
+"\n"
+"varying vec4 destinationColour;\n"
+"varying vec2 textureCoordOut;\n"
+"\n"
+"\n"
+"void main()\n"
+"{\n"
+"    gl_FragColor = destinationColour;\n"
+"}\n";
+
+const char* FlatColor_shader = (const char*) temp_binary_data_1;
+
+//================== Flattened.shader ==================
+static const unsigned char temp_binary_data_2[] =
+"#shader preset display name Flattened\n"
+"#shader vertex\n"
+"\n"
+"attribute vec4 position;\n"
+"attribute vec4 normal;\n"
+"\n"
+"uniform mat4 projectionMatrix;\n"
+"uniform mat4 viewMatrix;\n"
+"uniform vec4 lightPosition;\n"
+"\n"
+"varying float lightIntensity;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    vec4 light = viewMatrix * lightPosition;\n"
+"    lightIntensity = dot (light, normal);\n"
+"\n"
+"    vec4 v = vec4 (position);\n"
+"    v.z = v.z * 0.1;\n"
+"\n"
+"    gl_Position = projectionMatrix * viewMatrix * v;\n"
+"},\n"
+"\n"
+"#shader fragment\n"
+"\n"
+"varying float lightIntensity;\n"
+"\n"
+"void main()\n"
+"{\n"
+"   float l = lightIntensity * 0.25;\n"
+"   vec4 colour = vec4 (l, l, l, 1.0);\n"
+"   gl_FragColor = colour;\n"
+"}\n";
+
+const char* Flattened_shader = (const char*) temp_binary_data_2;
+
+//================== Rainbow.shader ==================
+static const unsigned char temp_binary_data_3[] =
+"#shader preset display name Rainbow\n"
+"#shader vertex\n"
+"\n"
+"attribute vec4 position;\n"
+"attribute vec4 sourceColour;\n"
+"attribute vec2 textureCoordIn;\n"
+"\n"
+"uniform mat4 projectionMatrix;\n"
+"uniform mat4 viewMatrix;\n"
+"\n"
+"varying vec4 destinationColour;\n"
+"varying vec2 textureCoordOut;\n"
+"\n"
+"varying float xPos;\n"
+"varying float yPos;\n"
+"varying float zPos;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    vec4 v = vec4 (position);\n"
+"    xPos = clamp (v.x, 0.0, 1.0);\n"
+"    yPos = clamp (v.y, 0.0, 1.0);\n"
+"    zPos = clamp (v.z, 0.0, 1.0);\n"
+"    gl_Position = projectionMatrix * viewMatrix * position;\n"
+"}\n"
+"\n"
+"#shader fragment\n"
+"\n"
+"varying vec4 destinationColour;\n"
+"varying vec2 textureCoordOut;\n"
+"varying float xPos;\n"
+"varying float yPos;\n"
+"varying float zPos;\n"
+"\n"
+"\n"
+"void main()\n"
+"{\n"
+"    gl_FragColor = vec4 (xPos, yPos, zPos, 1.0);\n"
+"}\n";
+
+const char* Rainbow_shader = (const char*) temp_binary_data_3;
+
+//================== SimpleLight.shader ==================
+static const unsigned char temp_binary_data_4[] =
+"#shader preset display name Simple Light\n"
+"#shader vertex\n"
+"\n"
+"attribute vec4 position;\n"
+"attribute vec4 normal;\n"
+"\n"
+"uniform mat4 projectionMatrix;\n"
+"uniform mat4 viewMatrix;\n"
+"uniform vec4 lightPosition;\n"
+"\n"
+"varying float lightIntensity;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    vec4 light = viewMatrix * lightPosition;\n"
+"    lightIntensity = dot (light, normal);\n"
+"\n"
+"    gl_Position = projectionMatrix * viewMatrix * position;\n"
+"}\n"
+"\n"
+"#shader fragment\n"
+"\n"
+"varying float lightIntensity;\n"
+"\n"
+"void main()\n"
+"{\n"
+"   float l = lightIntensity * 0.25;\n"
+"   vec4 colour = vec4 (l, l, l, 1.0);\n"
+"\n"
+"\n"
+"    gl_FragColor = colour;\n"
+"}\n";
+
+const char* SimpleLight_shader = (const char*) temp_binary_data_4;
+
+//================== SpiralArray.shader ==================
+static const unsigned char temp_binary_data_5[] =
+"#shader preset display name Spiral Array Shader\n"
+"#shader vertex\n"
+"\n"
+"attribute vec4 position;\n"
+"attribute vec4 sourceColour;\n"
+"attribute vec2 textureCoordIn;\n"
+"\n"
+"uniform mat4 projectionMatrix;\n"
+"uniform mat4 viewMatrix;\n"
+"\n"
+"varying vec4 destinationColour;\n"
+"varying vec2 textureCoordOut;\n"
+"\n"
+"varying float xPos;\n"
+"varying float yPos;\n"
+"varying float zPos;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    vec4 v = vec4 (position);\n"
+"    xPos = clamp (v.x, 0.0, 1.0);\n"
+"    yPos = clamp (v.y, 0.0, 1.0);\n"
+"    zPos = clamp (v.z, 0.0, 1.0);\n"
+"    gl_Position = projectionMatrix * viewMatrix * position;\n"
+"},\n"
+"\n"
+"#shader fragment\n"
+"\n"
+"varying vec4 destinationColour;\n"
+"varying vec2 textureCoordOut;\n"
+"varying float xPos;\n"
+"varying float yPos;\n"
+"varying float zPos;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    gl_FragColor = vec4 (xPos, yPos, zPos, 1.0);\n"
+"}\n";
+
+const char* SpiralArray_shader = (const char*) temp_binary_data_5;
+
+//================== Textured.shader ==================
+static const unsigned char temp_binary_data_6[] =
+"#shader preset display name Textured\n"
+"#shader vertex\n"
+"\n"
+"\n"
+"\n"
+"attribute vec4 position;\n"
+"attribute vec4 sourceColour;\n"
+"attribute vec2 textureCoordIn;\n"
+"\n"
+"uniform mat4 projectionMatrix;\n"
+"uniform mat4 viewMatrix;\n"
+"\n"
+"varying vec4 destinationColour;\n"
+"varying vec2 textureCoordOut;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    destinationColour = sourceColour;\n"
+"    textureCoordOut = textureCoordIn;\n"
+"    gl_Position = projectionMatrix * viewMatrix * position;\n"
+"}\n"
+"\n"
+"#shader fragment\n"
+"\n"
+"varying vec4 destinationColour;\n"
+"varying vec2 textureCoordOut;\n"
+"\n"
+"\n"
+"uniform sampler2D demoTexture;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    gl_FragColor = texture2D (demoTexture, textureCoordOut);\n"
+"}\n";
+
+const char* Textured_shader = (const char*) temp_binary_data_6;
+
+//================== TextureLighting.shader ==================
+static const unsigned char temp_binary_data_7[] =
+"#shader preset display name Texture + Lighting\n"
+"#shader vertex\n"
+"\n"
+"attribute vec4 position;\n"
+"attribute vec4 normal;\n"
+"attribute vec4 sourceColour;\n"
+"attribute vec2 textureCoordIn;\n"
+"\n"
+"uniform mat4 projectionMatrix;\n"
+"uniform mat4 viewMatrix;\n"
+"uniform vec4 lightPosition;\n"
+"\n"
+"varying vec4 destinationColour;\n"
+"varying vec2 textureCoordOut;\n"
+"varying float lightIntensity;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    destinationColour = sourceColour;\n"
+"    textureCoordOut = textureCoordIn;\n"
+"\n"
+"    vec4 light = viewMatrix * lightPosition;\n"
+"    lightIntensity = dot (light, normal);\n"
+"    gl_Position = projectionMatrix * viewMatrix * position;\n"
+"}\n"
+"\n"
+"#shader fragment\n"
+"\n"
+"\n"
+"varying vec4 destinationColour;\n"
+"varying vec2 textureCoordOut;\n"
+"varying float lightIntensity;\n"
+"\n"
+"\n"
+"uniform sampler2D demoTexture;\n"
+"\n"
+"void main()\n"
+"{\n"
+"\n"
+"   float l = max (0.3, lightIntensity * 0.3);\n"
+"   vec4 colour = vec4 (l, l, l, 1.0);\n"
+"\n"
+"    gl_FragColor = colour * texture2D (demoTexture, textureCoordOut);\n"
+"}\n";
+
+const char* TextureLighting_shader = (const char*) temp_binary_data_7;
+
+//================== Toon.shader ==================
+static const unsigned char temp_binary_data_8[] =
+"#shader preset display name Toon Shader\n"
+"#shader vertex\n"
+"\n"
+"attribute vec4 position;\n"
+"attribute vec4 normal;\n"
+"\n"
+"uniform mat4 projectionMatrix;\n"
+"uniform mat4 viewMatrix;\n"
+"uniform vec4 lightPosition;\n"
+"\n"
+"varying float lightIntensity;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    vec4 light = viewMatrix * lightPosition;\n"
+"    lightIntensity = dot (light, normal);\n"
+"    gl_Position = projectionMatrix * viewMatrix * position;\n"
+"}\n"
+"\n"
+"#shader fragment\n"
+"\n"
+"varying float lightIntensity;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    float intensity = lightIntensity * 0.5;\n"
+"    vec4 colour;\n"
+"\n"
+"    if (intensity > 0.95)\n"
+"        colour = vec4 (1.0, 0.5, 0.5, 1.0);\n"
+"    else if (intensity > 0.5)\n"
+"        colour  = vec4 (0.6, 0.3, 0.3, 1.0);\n"
+"    else if (intensity > 0.25)\n"
+"        colour  = vec4 (0.4, 0.2, 0.2, 1.0);\n"
+"    else\n"
+"        colour  = vec4 (0.2, 0.1, 0.1, 1.0);\n"
+"\n"
+"    gl_FragColor = colour;\n"
+"}\n";
+
+const char* Toon_shader = (const char*) temp_binary_data_8;
+
+//================== portmeirion.jpg ==================
+static const unsigned char temp_binary_data_9[] =
 { 255,216,255,224,0,16,74,70,73,70,0,1,1,1,0,72,0,72,0,0,255,225,0,128,69,120,105,102,0,0,77,77,0,42,0,0,0,8,0,5,1,18,0,3,0,0,0,1,0,1,0,0,1,26,0,5,0,0,0,1,0,0,0,74,1,27,0,5,0,0,0,1,0,0,0,82,1,40,0,3,0,0,0,1,0,2,0,0,135,105,0,4,0,0,0,1,0,0,0,90,0,0,0,0,
 0,0,0,72,0,0,0,1,0,0,0,72,0,0,0,1,0,2,160,2,0,4,0,0,0,1,0,0,2,128,160,3,0,4,0,0,0,1,0,0,1,224,0,0,0,0,255,219,0,67,0,2,1,1,2,1,1,2,2,1,2,2,2,2,2,3,5,3,3,3,3,3,6,4,4,3,5,7,6,7,7,7,6,6,6,7,8,11,9,7,8,10,8,6,6,9,13,9,10,11,11,12,12,12,7,9,13,14,13,12,14,
 11,12,12,11,255,219,0,67,1,2,2,2,3,2,3,5,3,3,5,11,8,6,8,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,255,192,0,17,8,1,224,2,128,3,1,34,0,2,17,1,3,
@@ -2141,10 +2513,10 @@ static const unsigned char temp_binary_data_0[] =
 239,226,175,66,158,18,17,251,71,44,170,115,253,147,232,11,223,143,58,52,219,154,214,206,229,89,155,119,222,85,249,170,199,135,62,38,219,120,150,230,72,45,215,202,111,189,186,70,175,158,191,180,103,73,23,200,149,127,221,90,234,190,16,248,154,91,63,22,
 199,29,212,155,99,149,118,252,223,195,83,95,13,24,211,230,167,241,23,74,167,217,145,255,217,0,0 };
 
-const char* portmeirion_jpg = (const char*) temp_binary_data_0;
+const char* portmeirion_jpg = (const char*) temp_binary_data_9;
 
 //================== pianokey_rectangle.obj ==================
-static const unsigned char temp_binary_data_1[] =
+static const unsigned char temp_binary_data_10[] =
 "# Ross Hoyt\n"
 "# Simple Custom Piano Key Object\n"
 "# Created with Tinkercad Server 2015\n"
@@ -2182,10 +2554,10 @@ static const unsigned char temp_binary_data_1[] =
 "#end of obj_0\n"
 "\n";
 
-const char* pianokey_rectangle_obj = (const char*) temp_binary_data_1;
+const char* pianokey_rectangle_obj = (const char*) temp_binary_data_10;
 
 //================== teapot.obj ==================
-static const unsigned char temp_binary_data_2[] =
+static const unsigned char temp_binary_data_11[] =
 { 35,32,116,101,97,112,111,116,46,111,98,106,10,35,32,84,104,101,32,84,101,97,112,111,116,32,77,111,100,101,108,32,116,104,97,116,32,105,115,32,117,115,101,100,32,105,110,32,74,85,67,69,32,70,114,97,109,101,119,111,114,107,32,69,120,97,109,112,108,101,
 115,46,10,35,10,118,32,32,53,46,57,50,57,54,56,56,32,52,46,49,50,53,48,48,48,32,48,46,48,48,48,48,48,48,10,118,32,32,53,46,56,51,50,48,51,49,32,52,46,52,57,52,49,52,49,32,48,46,48,48,48,48,48,48,10,118,32,32,53,46,57,52,53,51,49,51,32,52,46,54,49,55,
 49,56,56,32,48,46,48,48,48,48,48,48,10,118,32,32,54,46,49,55,53,55,56,49,32,52,46,52,57,52,49,52,49,32,48,46,48,48,48,48,48,48,10,118,32,32,54,46,52,50,57,54,56,56,32,52,46,49,50,53,48,48,48,32,48,46,48,48,48,48,48,48,10,118,32,32,53,46,51,56,55,49,56,
@@ -3339,7 +3711,7 @@ static const unsigned char temp_binary_data_2[] =
 56,10,102,32,53,50,57,47,55,57,52,47,53,50,57,32,52,54,57,47,55,57,57,47,52,54,57,32,52,55,48,47,56,48,48,47,52,55,48,10,102,32,52,55,48,47,56,48,48,47,52,55,48,32,53,51,48,47,55,57,53,47,53,51,48,32,53,50,57,47,55,57,52,47,53,50,57,10,35,32,57,57,50,
 32,102,97,99,101,115,10,10,103,10,0,0 };
 
-const char* teapot_obj = (const char*) temp_binary_data_2;
+const char* teapot_obj = (const char*) temp_binary_data_11;
 
 
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
@@ -3352,6 +3724,15 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
 
     switch (hash)
     {
+        case 0x8ab4116e:  numBytes = 776; return ChangingColor_shader;
+        case 0xd805ea7a:  numBytes = 551; return FlatColor_shader;
+        case 0xefadae21:  numBytes = 595; return Flattened_shader;
+        case 0x5ddb6eae:  numBytes = 735; return Rainbow_shader;
+        case 0xecd5c220:  numBytes = 555; return SimpleLight_shader;
+        case 0x800e963c:  numBytes = 747; return SpiralArray_shader;
+        case 0x362d3e1b:  numBytes = 605; return Textured_shader;
+        case 0xa07c41fd:  numBytes = 908; return TextureLighting_shader;
+        case 0x1ee4920a:  numBytes = 815; return Toon_shader;
         case 0x40c51c28:  numBytes = 145904; return portmeirion_jpg;
         case 0xc017361e:  numBytes = 442; return pianokey_rectangle_obj;
         case 0x754c69fd:  numBytes = 95004; return teapot_obj;
@@ -3364,6 +3745,15 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
 
 const char* namedResourceList[] =
 {
+    "ChangingColor_shader",
+    "FlatColor_shader",
+    "Flattened_shader",
+    "Rainbow_shader",
+    "SimpleLight_shader",
+    "SpiralArray_shader",
+    "Textured_shader",
+    "TextureLighting_shader",
+    "Toon_shader",
     "portmeirion_jpg",
     "pianokey_rectangle_obj",
     "teapot_obj"
@@ -3371,6 +3761,15 @@ const char* namedResourceList[] =
 
 const char* originalFilenames[] =
 {
+    "ChangingColor.shader",
+    "FlatColor.shader",
+    "Flattened.shader",
+    "Rainbow.shader",
+    "SimpleLight.shader",
+    "SpiralArray.shader",
+    "Textured.shader",
+    "TextureLighting.shader",
+    "Toon.shader",
     "portmeirion.jpg",
     "pianokey_rectangle.obj",
     "teapot.obj"

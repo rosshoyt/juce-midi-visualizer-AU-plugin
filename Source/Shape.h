@@ -47,11 +47,12 @@ struct Shape
         
         for (int i = 0; i < vertexBuffers.size(); ++i)
         {
+            
             VertexBuffer& vertexBuffer = *vertexBuffers.getUnchecked (i);
             vertexBuffer.bind();
             
             attributes.enable (openGLContext);
-            
+            //glEnable (GL_BLEND); glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDrawArrays(GL_LINE_LOOP, vertexBuffer.indexBuffer, vertexBuffer.numIndices);
             
             attributes.disable (openGLContext);

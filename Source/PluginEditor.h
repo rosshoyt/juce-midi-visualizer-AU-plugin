@@ -14,12 +14,14 @@ They are defined PluginEditor.h
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
+#include "GLUtils.h"
 
 
 //==============================================================================
 /**
 */
-class GLComponent; // forward declared
+class GLComponent; // forward declared - implemented in CPP file
+
 class PluginEditor  : public AudioProcessorEditor
 {
 public:
@@ -76,10 +78,15 @@ private:
     
     ScopedPointer<GLComponent> glComponent;
     
+    // SHADERS
+    const char * SHADERS_ABS_DIR_PATH = "/Users/RossHoyt/Downloads/GLPlugin/Source";
+    Array<ShaderPreset> shaders;
+    void loadShaders(const char*);
+    
     // GUI constants
     static const int MARGIN = 4, MAX_WINDOW_HEIGHT = 800, MAX_WINDOW_WIDTH = 1200 + 2 * MARGIN,
     MAX_KEYB_WIDTH = 1200, MAX_KEYB_HEIGHT = 82, BUTTON_WIDTH = 50, BUTTON_HEIGHT = 30;
-    Colour backgroundColor { 44,54,60 }; // stock bckgrd colour
+    Colour backgroundColor { 44, 54, 60 };
     
     // Display Helper Method
     enum SubdividedOrientation { Vertical, Horizontal};

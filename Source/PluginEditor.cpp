@@ -26,13 +26,8 @@ public:
         parent = par;
         
         midiKeyboardState = &mKeybState;
-        Array<ShaderPreset> shaders = getShaderPresets();
         
-        if (shaders.size() > 0)
-        {
-            newVertexShader = shaders.getReference (0).vertexShader;
-            newFragmentShader = shaders.getReference (0).fragmentShader;
-        }
+        updateShader();
         
         lastTexture = textureToUse = new BuiltInTexture ("Portmeirion", BinaryData::portmeirion_jpg, BinaryData::portmeirion_jpgSize);
         
@@ -271,14 +266,10 @@ private:
 PluginEditor::PluginEditor (PluginProcessor& p, MidiKeyboardState& midiKeyboardState)
 : AudioProcessorEditor (&p), processor (p), midiKeyboardComponent(midiKeyboardState, MidiKeyboardComponent::horizontalKeyboard)
 {
-    // TOP MIDI KEYBOARD DISPLAY
+    // TOP: MIDI KEYBOARD DISPLAY
     addAndMakeVisible(midiKeyboardComponent);
     
-    // BOTTOM RIGHT - OPENGL DISPLAY
-    glComponent = new GLComponent(midiKeyboardState, this);
-    addAndMakeVisible (glComponent);
-    
-    // LEFT - OBJ FILE SELECTOR (RADIO BOX GROUP)
+    // LEFT TOOLBAR: OBJ FILE SELECTOR (RADIO BOX GROUP)
     radioButtonsObjSelector = new GroupComponent ("OBJ Selector", "Use Obj File:");
     addAndMakeVisible (radioButtonsObjSelector);
     togglePianoKeyObj = new ToggleButton("Pianokey_rectangle.obj");
@@ -290,7 +281,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, MidiKeyboardState& midiKeyboardS
     addAndMakeVisible(togglePianoKeyObj);
     addAndMakeVisible(toggleTeapotObj);
     
-    // LEFT - ZOOM SLIDER
+    // LEFT TOOLBAR: ZOOM SLIDER
     addAndMakeVisible (zoomSlider);
     zoomSlider.setRange (0.0, 1.0, 0.001);
     zoomSlider.addListener (glComponent);
@@ -298,7 +289,7 @@ PluginEditor::PluginEditor (PluginProcessor& p, MidiKeyboardState& midiKeyboardS
     zoomLabel.attachToComponent (&zoomSlider, false);
     addAndMakeVisible (zoomLabel);
     
-    // LEFT RADIO BOX: Draw Points
+    // LEFT RADIO BOX: 'Draw Points'
     toggleDrawControlMesh = new ToggleButton("Draw Points");
     toggleDrawControlMesh->onClick = [this] { updateToggleState (toggleDrawControlMesh, "Draw Points");   };
     addAndMakeVisible(toggleDrawControlMesh);
@@ -307,15 +298,25 @@ PluginEditor::PluginEditor (PluginProcessor& p, MidiKeyboardState& midiKeyboardS
     addAndMakeVisible (shaderPresetBox);
     shaderPresetBox.onChange = [this] { selectShaderPreset (shaderPresetBox.getSelectedItemIndex()); };
     
-    auto presets = getShaderPresets();
+    shaders = getShaderPresets(SHADERS_ABS_DIR_PATH);
     
-    for (int i = 0; i < presets.size(); ++i)
-        shaderPresetBox.addItem (presets[i].name, i + 1);
+    for (int i = 0; i < shaders.size(); ++i)
+        shaderPresetBox.addItem (shaders[i].name, i + 1);
     
-    addAndMakeVisible (shaderPresetBoxLabel);
     shaderPresetBoxLabel.attachToComponent (&shaderPresetBox, true);
-
+    addAndMakeVisible(shaderPresetBoxLabel);
+    addAndMakeVisible (shaderPresetBoxLabel);
+    
+    // BOTTOM RIGHT - OPENGL DISPLAY
+    glComponent = new GLComponent(midiKeyboardState, this);
+    addAndMakeVisible (glComponent);
+    
+    
+    
     initialise();
+    
+  
+    
     
     //setResizable(true, true);
     setSize (1000, 725);
@@ -334,6 +335,7 @@ void PluginEditor::initialise()
     
 }
 
+
 void PluginEditor::updateToggleState (Button* button, String name)
 {
     if(name == "Draw Points") glComponent->drawControlMesh = button->getToggleState();
@@ -346,11 +348,11 @@ void PluginEditor::updateToggleState (Button* button, String name)
 
 void PluginEditor::selectShaderPreset (int preset)
 {
-    const auto& p = getShaderPresets()[preset];
+    const auto& p = shaders[preset];
     setShaderProgram(p.vertexShader, p.fragmentShader);
 }
 
-void  PluginEditor::setShaderProgram (const String& vertexShader, const String& fragmentShader)
+void PluginEditor::setShaderProgram (const String& vertexShader, const String& fragmentShader)
 {
     glComponent->newVertexShader = vertexShader;
     glComponent->newFragmentShader = fragmentShader;

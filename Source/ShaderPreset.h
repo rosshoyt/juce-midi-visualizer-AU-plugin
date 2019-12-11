@@ -10,9 +10,4 @@
 
 #pragma once
 
-struct ShaderPreset
-{
-    const char* name;
-    const char* vertexShader;
-    const char* fragmentShader;
-};
+

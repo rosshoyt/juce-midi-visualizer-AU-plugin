@@ -13,15 +13,29 @@
   <MAINGROUP id="snosp0" name="GLPlugin">
     <GROUP id="{10B53D3B-D2A8-6E5A-3C25-C4A55D52FBBF}" name="Source">
       <GROUP id="{9A566155-ECF4-D247-29CC-8130EE9E483D}" name="OpenGL">
-        <FILE id="uMBiZ4" name="GLComponent.h" compile="0" resource="0" file="Source/GLComponent.h"/>
+        <GROUP id="{B3CBF7BA-2668-E92F-E155-97E480635AF6}" name="Shaders">
+          <FILE id="gSfp16" name="ChangingColor.shader" compile="0" resource="1"
+                file="Source/ChangingColor.shader"/>
+          <FILE id="GSqKJm" name="FlatColor.shader" compile="0" resource="1"
+                file="Source/FlatColor.shader"/>
+          <FILE id="bkkk6Q" name="Flattened.shader" compile="0" resource="1"
+                file="Source/Flattened.shader"/>
+          <FILE id="OIlUtc" name="Rainbow.shader" compile="0" resource="1" file="Source/Rainbow.shader"/>
+          <FILE id="c6YJxo" name="SimpleLight.shader" compile="0" resource="1"
+                file="Source/SimpleLight.shader"/>
+          <FILE id="WJOkHo" name="SpiralArray.shader" compile="0" resource="1"
+                file="Source/SpiralArray.shader"/>
+          <FILE id="PaTG4g" name="Textured.shader" compile="0" resource="1" file="Source/Textured.shader"/>
+          <FILE id="ejXEWA" name="TextureLighting.shader" compile="0" resource="1"
+                file="Source/TextureLighting.shader"/>
+          <FILE id="DNBHiL" name="Toon.shader" compile="0" resource="1" file="Source/Toon.shader"/>
+        </GROUP>
         <FILE id="lImRAM" name="ShaderPreset.h" compile="0" resource="0" file="Source/ShaderPreset.h"/>
         <FILE id="H8TL8U" name="Attributes.h" compile="0" resource="0" file="Source/Attributes.h"/>
         <FILE id="ZqQtW6" name="portmeirion.jpg" compile="0" resource="1" file="Source/portmeirion.jpg"/>
         <FILE id="zpF7xa" name="pianokey_rectangle.obj" compile="0" resource="1"
               file="../../Development/GRAPHICS OBJS/pianokey_rectangle.obj"/>
         <FILE id="fSqP7u" name="teapot.obj" compile="0" resource="1" file="Source/teapot.obj"/>
-        <FILE id="BHHood" name="ShaderPresetManager.h" compile="0" resource="0"
-              file="Source/ShaderPresetManager.h"/>
         <FILE id="m9jtiJ" name="Shape.h" compile="0" resource="0" file="Source/Shape.h"/>
         <FILE id="Yb8Czq" name="GLUtils.h" compile="0" resource="0" file="Source/GLUtils.h"/>
         <FILE id="dS9MtO" name="Textures.h" compile="0" resource="0" file="Source/Textures.h"/>
@@ -34,10 +48,9 @@
             file="Source/PluginProcessor.cpp"/>
       <FILE id="GZQ16D" name="PluginProcessor.h" compile="0" resource="0"
             file="Source/PluginProcessor.h"/>
-      <FILE id="TwhEBw" name="GlmidipluginEditor.cpp" compile="1" resource="0"
-            file="Source/GlmidipluginEditor.cpp"/>
-      <FILE id="aE4HeI" name="GlmidipluginEditor.h" compile="0" resource="0"
-            file="Source/GlmidipluginEditor.h"/>
+      <FILE id="FW62kr" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="mAFSYL" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
