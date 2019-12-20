@@ -1,3 +1,4 @@
 *.DS_Store
 /Builds
-GLPlugin_Logic.logicx
+#GLPlugin_Logic.logicx
+/DemoContent

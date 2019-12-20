@@ -2143,49 +2143,8 @@ static const unsigned char temp_binary_data_0[] =
 
 const char* portmeirion_jpg = (const char*) temp_binary_data_0;
 
-//================== pianokey_rectangle.obj ==================
-static const unsigned char temp_binary_data_1[] =
-"# Ross Hoyt\n"
-"# Simple Custom Piano Key Object\n"
-"# Created with Tinkercad Server 2015\n"
-"\n"
-"#o obj_0\n"
-"v 1 \t\t-7.5 \t\t0.75\n"
-"v 1 \t\t-7.5 \t\t0\n"
-"v 1 \t\t1.5 \t\t0\n"
-"v 1 \t\t1.5 \t\t0.75\n"
-"v -0.5 \t\t1.5 \t\t0.75\n"
-"v -0.5 \t\t1.5 \t\t0\n"
-"v -0.5 \t\t-7.5 \t\t0\n"
-"v -0.5 \t\t-7.5 \t\t0.75\n"
-"# 8 vertices\n"
-"\n"
-"g group_0_16089887\n"
-"\n"
-"#usemtl color_16089887\n"
-"#s 0\n"
-"\n"
-"f 1 \t2 \t3\n"
-"f 1 \t3 \t4\n"
-"f 5 \t6 \t7\n"
-"f 5 \t7 \t8\n"
-"f 4 \t5 \t8\n"
-"f 4 \t8 \t1\n"
-"f 2 \t7 \t6\n"
-"f 2 \t6 \t3\n"
-"f 4 \t3 \t6\n"
-"f 4 \t6 \t5\n"
-"f 8 \t7 \t2\n"
-"f 8 \t2 \t1\n"
-"# 12 faces\n"
-"\n"
-"#end of obj_0\n"
-"\n";
-
-const char* pianokey_rectangle_obj = (const char*) temp_binary_data_1;
-
 //================== teapot.obj ==================
-static const unsigned char temp_binary_data_2[] =
+static const unsigned char temp_binary_data_1[] =
 { 35,32,116,101,97,112,111,116,46,111,98,106,10,35,32,84,104,101,32,84,101,97,112,111,116,32,77,111,100,101,108,32,116,104,97,116,32,105,115,32,117,115,101,100,32,105,110,32,74,85,67,69,32,70,114,97,109,101,119,111,114,107,32,69,120,97,109,112,108,101,
 115,46,10,35,10,118,32,32,53,46,57,50,57,54,56,56,32,52,46,49,50,53,48,48,48,32,48,46,48,48,48,48,48,48,10,118,32,32,53,46,56,51,50,48,51,49,32,52,46,52,57,52,49,52,49,32,48,46,48,48,48,48,48,48,10,118,32,32,53,46,57,52,53,51,49,51,32,52,46,54,49,55,
 49,56,56,32,48,46,48,48,48,48,48,48,10,118,32,32,54,46,49,55,53,55,56,49,32,52,46,52,57,52,49,52,49,32,48,46,48,48,48,48,48,48,10,118,32,32,54,46,52,50,57,54,56,56,32,52,46,49,50,53,48,48,48,32,48,46,48,48,48,48,48,48,10,118,32,32,53,46,51,56,55,49,56,
@@ -3339,7 +3298,48 @@ static const unsigned char temp_binary_data_2[] =
 56,10,102,32,53,50,57,47,55,57,52,47,53,50,57,32,52,54,57,47,55,57,57,47,52,54,57,32,52,55,48,47,56,48,48,47,52,55,48,10,102,32,52,55,48,47,56,48,48,47,52,55,48,32,53,51,48,47,55,57,53,47,53,51,48,32,53,50,57,47,55,57,52,47,53,50,57,10,35,32,57,57,50,
 32,102,97,99,101,115,10,10,103,10,0,0 };
 
-const char* teapot_obj = (const char*) temp_binary_data_2;
+const char* teapot_obj = (const char*) temp_binary_data_1;
+
+//================== pianokey_rectangle.obj ==================
+static const unsigned char temp_binary_data_2[] =
+"# Object Export From Tinkercad Server 2015\n"
+"\n"
+"mtllib obj.mtl\n"
+"\n"
+"o obj_0\n"
+"v 1 \t\t-7.5 \t\t0.75\n"
+"v 1 \t\t-7.5 \t\t0\n"
+"v 1 \t\t1.5 \t\t0\n"
+"v 1 \t\t1.5 \t\t0.75\n"
+"v -0.5 \t\t1.5 \t\t0.75\n"
+"v -0.5 \t\t1.5 \t\t0\n"
+"v -0.5 \t\t-7.5 \t\t0\n"
+"v -0.5 \t\t-7.5 \t\t0.75\n"
+"# 8 vertices\n"
+"\n"
+"g group_0_16089887\n"
+"\n"
+"usemtl color_16089887\n"
+"s 0\n"
+"\n"
+"f 1 \t2 \t3\n"
+"f 1 \t3 \t4\n"
+"f 5 \t6 \t7\n"
+"f 5 \t7 \t8\n"
+"f 4 \t5 \t8\n"
+"f 4 \t8 \t1\n"
+"f 2 \t7 \t6\n"
+"f 2 \t6 \t3\n"
+"f 4 \t3 \t6\n"
+"f 4 \t6 \t5\n"
+"f 8 \t7 \t2\n"
+"f 8 \t2 \t1\n"
+"# 12 faces\n"
+"\n"
+" #end of obj_0\n"
+"\n";
+
+const char* pianokey_rectangle_obj = (const char*) temp_binary_data_2;
 
 
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
@@ -3353,8 +3353,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
     switch (hash)
     {
         case 0x40c51c28:  numBytes = 145904; return portmeirion_jpg;
-        case 0xc017361e:  numBytes = 442; return pianokey_rectangle_obj;
         case 0x754c69fd:  numBytes = 95004; return teapot_obj;
+        case 0xc017361e:  numBytes = 417; return pianokey_rectangle_obj;
         default: break;
     }
 
@@ -3365,15 +3365,15 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
 const char* namedResourceList[] =
 {
     "portmeirion_jpg",
-    "pianokey_rectangle_obj",
-    "teapot_obj"
+    "teapot_obj",
+    "pianokey_rectangle_obj"
 };
 
 const char* originalFilenames[] =
 {
     "portmeirion.jpg",
-    "pianokey_rectangle.obj",
-    "teapot.obj"
+    "teapot.obj",
+    "pianokey_rectangle.obj"
 };
 
 const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8)
